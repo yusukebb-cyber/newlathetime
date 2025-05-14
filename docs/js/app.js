@@ -19,6 +19,7 @@ const filterNameInput = document.getElementById('filter-name');
 const applyFilterBtn = document.querySelector('.btn-apply-filter');
 const totalTimeDisplay = document.getElementById('total-time');
 const totalWorksDisplay = document.getElementById('total-works');
+const totalQuantityDisplay = document.getElementById('total-quantity');
 const uniqueDrawingsDisplay = document.getElementById('unique-drawings');
 const avgTimeDisplay = document.getElementById('avg-time');
 const themeSelect = document.getElementById('theme-select');
@@ -507,14 +508,18 @@ function updateReportData() {
 
 // 集計データを更新
 function updateSummaryData(data) {
-    const totalWorks = data.length;
+    const totalWorks = data.length; // 作業回数
     let totalTimeMs = 0;
+    let totalQuantity = 0; // 総数量
     
     // 図面枚数を計算（ユニークな図面番号の数）
     const uniqueDrawings = new Set();
     
     data.forEach(work => {
         totalTimeMs += work.timeRaw;
+        
+        // 品物の数量を集計
+        totalQuantity += work.quantity || 0;
         
         // 空白や「番号なし」でない有効な図面番号のみを数える
         if (work.name && work.name.trim() !== '' && work.name !== '番号なし') {
@@ -527,6 +532,7 @@ function updateSummaryData(data) {
     
     // 表示を更新
     totalWorksDisplay.textContent = totalWorks;
+    totalQuantityDisplay.textContent = totalQuantity;
     totalTimeDisplay.textContent = formatTimeForSave(totalTimeMs);
     uniqueDrawingsDisplay.textContent = uniqueDrawingsCount;
     avgTimeDisplay.textContent = formatTimeForSave(avgTimeMs);
