@@ -317,10 +317,23 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+}
+
+/* モバイル画面での図面番号入力フィールドの調整 */
+@media (max-width: 480px) {
+    .input-with-buttons input {
+        flex: 2; /* モバイルではより効率的に空間を使用 */
+    }
+    
+    .input-with-buttons button {
+        padding: 0 8px;
+        font-size: 14px;
+    }
 }
 
 .input-with-buttons input {
-    flex: 1;
+    flex: 3; /* フレックス比率を3に増やして、より横幅を取るようにする */
 }
 
 .input-with-buttons button {
@@ -333,6 +346,8 @@ body {
     
     /* スキャンボタン用に幅を調整 */
     width: auto;
+    flex: 1; /* テキストフィールドとの比率を設定 */
+    white-space: nowrap; /* テキストが折り返さないようにする */
 }
 
 .button-icon {
