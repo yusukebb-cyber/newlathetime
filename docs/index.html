@@ -222,10 +222,19 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js').then(registration => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed:', err);
+                // 既存のService Workerをすべて削除
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                    }
+                    // 削除後、新しいService Workerを登録
+                    setTimeout(() => {
+                        navigator.serviceWorker.register('service-worker.js').then(registration => {
+                            console.log('ServiceWorker registration successful');
+                        }).catch(err => {
+                            console.log('ServiceWorker registration failed:', err);
+                        });
+                    }, 1000);
                 });
             });
         }
