@@ -252,7 +252,7 @@ function displayTime(time) {
 // 作業データを保存
 function saveWorkData() {
     if (elapsedTime > 0) {
-        const workName = workNameInput.value || '名称なし';
+        const workName = workNameInput.value || '番号なし';
         const workPart = workPartInput.value || '-';
         const workTime = formatTimeForSave(elapsedTime);
         const workDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD形式
@@ -451,6 +451,9 @@ function startNewWork() {
     
     // タイマーリセット
     resetTimer();
+    
+    // 図面番号入力フィールドにフォーカス
+    workNameInput.focus();
 }
 
 // データのエクスポート (CSV形式)
@@ -463,7 +466,7 @@ function exportData(allData = false) {
         return;
     }
     
-    let csvContent = '作業名,部品番号,数量,時間,日付,メモ\n';
+    let csvContent = '図面番号,備考,数量,時間,日付,詳細メモ\n';
     
     dataToExport.forEach(work => {
         csvContent += `"${csvEscape(work.name)}","${csvEscape(work.part)}","${work.quantity}","${work.time}","${formatDisplayDate(work.date)}","${csvEscape(work.notes)}"\n`;
