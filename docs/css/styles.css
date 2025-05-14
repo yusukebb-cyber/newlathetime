@@ -300,8 +300,9 @@ body {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-small);
     font-size: 16px;
-    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+    transition: all 0.2s ease;
     background-color: #FAFAFA;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .form-group input:focus, 
@@ -309,64 +310,99 @@ body {
 .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px var(--primary-light);
+    box-shadow: 0 0 0 2px var(--primary-light), 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* 図面番号入力関連のスタイル */
 .input-with-buttons {
     display: flex;
     align-items: center;
-    gap: 8px;
     width: 100%;
 }
 
-/* モバイル画面での図面番号入力フィールドの調整 */
-@media (max-width: 480px) {
-    .input-with-buttons input {
-        flex: 2; /* モバイルではより効率的に空間を使用 */
-    }
-    
-    .input-with-buttons button {
-        padding: 0 8px;
-        font-size: 14px;
-    }
+/* 入力フィールドとボタンをまとめたラッパー */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    border-radius: var(--radius-small);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
 }
 
+.input-wrapper:focus-within {
+    box-shadow: 0 0 0 2px var(--primary-light), 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 入力フィールド */
 .input-with-buttons input {
-    flex: 3; /* フレックス比率を3に増やして、より横幅を取るようにする */
+    flex: 1;
+    border-radius: var(--radius-small) 0 0 var(--radius-small);
+    border-right: none;
+    padding-right: 48px; /* ボタン用のスペース */
+    transition: all 0.2s ease;
 }
 
-.input-with-buttons button {
+/* スキャンボタン */
+.scan-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 48px;
     min-width: unset;
+    background-color: transparent;
+    border: none;
+    border-radius: 0 var(--radius-small) var(--radius-small) 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 12px;
-    height: 48px;
-    
-    /* スキャンボタン用に幅を調整 */
-    width: auto;
-    flex: 1; /* テキストフィールドとの比率を設定 */
-    white-space: nowrap; /* テキストが折り返さないようにする */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--primary-color);
+    z-index: 2;
 }
 
+.scan-button:hover {
+    background-color: var(--primary-light);
+}
+
+.scan-button:active {
+    transform: scale(0.95);
+}
+
+/* ボタンアイコン */
 .button-icon {
     width: 24px;
     height: 24px;
     object-fit: contain;
-    vertical-align: middle;
-    margin-right: 8px;
+    opacity: 0.8;
+    transition: all 0.2s ease;
 }
 
-.input-with-buttons button:hover {
-    background-color: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-1);
+.scan-button:hover .button-icon {
+    opacity: 1;
+    transform: scale(1.1);
 }
 
-.input-with-buttons button span {
-    font-size: 24px;
+/* モバイル対応 */
+@media (max-width: 480px) {
+    .input-wrapper {
+        height: 42px; /* モバイルでは少し小さく */
+    }
+    
+    .scan-button {
+        width: 42px;
+    }
+    
+    .button-icon {
+        width: 20px;
+        height: 20px;
+    }
 }
+
+/* 古いスタイルは削除 */
 
 #camera-container {
     margin-top: 16px;

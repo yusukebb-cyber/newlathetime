@@ -57,11 +57,12 @@
                     <div class="form-group">
                         <label for="work-name">図面番号</label>
                         <div class="input-with-buttons">
-                            <input type="text" id="work-name" placeholder="図面番号を入力">
-                            <button type="button" id="btn-image" title="画像から読み取り">
-                                <img src="images/icons/scan-icon.png" class="button-icon" alt="スキャン">
-                                画像から読み取り
-                            </button>
+                            <div class="input-wrapper">
+                                <input type="text" id="work-name" placeholder="図面番号を入力">
+                                <button type="button" id="btn-image" class="scan-button" title="画像から読み取り">
+                                    <img src="images/icons/scan-icon.png" class="button-icon" alt="スキャン">
+                                </button>
+                            </div>
                             <input type="file" id="image-upload" accept="image/*" capture="environment" style="display: none;">
                         </div>
                         <canvas id="image-canvas" style="display: none;"></canvas>
