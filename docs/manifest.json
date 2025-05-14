@@ -1,0 +1,17 @@
+{
+  "name": "旋盤タイム",
+  "short_name": "旋盤タイム",
+  "description": "旋盤作業の加工時間測定＆管理アプリ",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f5f5f7",
+  "theme_color": "#3498DB",
+  "icons": [
+    {
+      "src": "images/lathe-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>旋盤作業時間測定</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="app-logo">
+                <img src="assets/lathe-icon.svg" alt="旋盤アイコン">
+                <h1>旋盤タイム</h1>
+            </div>
+            <nav class="menu">
+                <ul>
+                    <li class="active"><span class="icon">⏱️</span> 測定</li>
+                    <li><span class="icon">📊</span> レポート</li>
+                    <li><span class="icon">⚙️</span> 設定</li>
+                </ul>
+            </nav>
+        </div>
+        <div class="main-content">
+            <div class="toolbar">
+                <h2>作業時間測定</h2>
+                <div class="tools">
+                    <button class="btn-new">新規作業</button>
+                    <button class="btn-export">データ出力</button>
+                </div>
+            </div>
+            
+            <div class="timer-section">
+                <div class="timer-display">
+                    <div class="time">00:00:00</div>
+                    <div class="status">停止中</div>
+                </div>
+                <div class="timer-controls">
+                    <button class="btn-start">開始</button>
+                    <button class="btn-pause" disabled>一時停止</button>
+                    <button class="btn-stop" disabled>停止</button>
+                </div>
+            </div>
+            
+            <div class="work-info">
+                <div class="form-group">
+                    <label for="work-name">作業名</label>
+                    <input type="text" id="work-name" placeholder="作業名を入力">
+                </div>
+                <div class="form-group">
+                    <label for="work-part">部品番号</label>
+                    <input type="text" id="work-part" placeholder="部品番号を入力">
+                </div>
+                <div class="form-group">
+                    <label for="work-quantity">数量</label>
+                    <input type="number" id="work-quantity" value="1" min="1">
+                </div>
+                <div class="form-group">
+                    <label for="work-notes">メモ</label>
+                    <textarea id="work-notes" placeholder="メモを入力"></textarea>
+                </div>
+            </div>
+            
+            <div class="recent-works">
+                <h3>最近の作業</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>作業名</th>
+                            <th>部品番号</th>
+                            <th>時間</th>
+                            <th>日付</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- データは JavaScript で挿入 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script src="renderer.js"></script>
+</body>
+</html>

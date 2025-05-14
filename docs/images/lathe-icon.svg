@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512px" height="512px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>旋盤アイコン</title>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <circle fill="#3498DB" cx="256" cy="256" r="256"></circle>
+        <g transform="translate(96, 126)" fill-rule="nonzero">
+            <!-- 基台 -->
+            <rect fill="#34495E" x="0" y="180" width="320" height="80" rx="8"></rect>
+            
+            <!-- 心押台 -->
+            <rect fill="#7F8C8D" x="20" y="150" width="60" height="60" rx="4"></rect>
+            <rect fill="#95A5A6" x="30" y="120" width="40" height="40"></rect>
+            <polygon fill="#BDC3C7" points="35,120 65,120 50,90"></polygon>
+            
+            <!-- 主軸台 -->
+            <rect fill="#7F8C8D" x="220" y="150" width="80" height="60" rx="4"></rect>
+            <circle fill="#E74C3C" cx="260" cy="180" r="25"></circle>
+            <circle fill="#C0392B" cx="260" cy="180" r="8"></circle>
+            
+            <!-- 切削工具 -->
+            <rect fill="#2C3E50" x="120" y="140" width="60" height="20"></rect>
+            <rect fill="#2C3E50" x="140" y="120" width="20" height="40"></rect>
+            <polygon fill="#2ECC71" points="140,120 160,120 150,100"></polygon>
+            
+            <!-- 横送り台 -->
+            <rect fill="#7F8C8D" x="100" y="160" width="100" height="30" rx="2"></rect>
+            
+            <!-- 工作物 -->
+            <rect fill="#F1C40F" x="80" y="178" width="160" height="4"></rect>
+            
+            <!-- タイマー/時計 -->
+            <circle fill="white" cx="50" cy="50" r="40"></circle>
+            <circle fill="#3498DB" cx="50" cy="50" r="35"></circle>
+            <circle fill="white" cx="50" cy="50" r="30"></circle>
+            <rect fill="#E74C3C" x="48" y="30" width="4" height="23"></rect>
+            <rect fill="#2C3E50" x="48" y="50" width="20" height="3"></rect>
+        </g>
+    </g>
+</svg>

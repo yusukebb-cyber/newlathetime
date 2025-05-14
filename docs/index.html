@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>旋盤タイム</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/lathe-icon.svg">
+    <meta name="theme-color" content="#3498DB">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="旋盤作業の加工時間測定＆管理アプリ - スマホでも使えるPWA対応">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="app-logo">
+                <img src="images/lathe-icon.svg" alt="旋盤アイコン">
+                <h1>旋盤タイム</h1>
+            </div>
+            <nav class="menu">
+                <ul>
+                    <li class="active" data-view="timer-view"><span class="icon">⏱️</span> <span class="menu-text">測定</span></li>
+                    <li data-view="report-view"><span class="icon">📊</span> <span class="menu-text">レポート</span></li>
+                    <li data-view="settings-view"><span class="icon">⚙️</span> <span class="menu-text">設定</span></li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="main-content">
+            <!-- タイマー画面 -->
+            <div id="timer-view" class="view-content active">
+                <div class="toolbar">
+                    <h2>作業時間測定</h2>
+                    <div class="tools">
+                        <button class="btn-new">新規作業</button>
+                        <button class="btn-export">データ出力</button>
+                    </div>
+                </div>
+                
+                <div class="timer-section">
+                    <div class="timer-display">
+                        <div class="time">00:00:00</div>
+                        <div class="status">停止中</div>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="btn-start">開始</button>
+                        <button class="btn-pause" disabled>一時停止</button>
+                        <button class="btn-stop" disabled>停止</button>
+                    </div>
+                </div>
+                
+                <div class="work-info">
+                    <div class="form-group">
+                        <label for="work-name">作業名</label>
+                        <input type="text" id="work-name" placeholder="作業名を入力">
+                    </div>
+                    <div class="form-group">
+                        <label for="work-part">部品番号</label>
+                        <input type="text" id="work-part" placeholder="部品番号を入力">
+                    </div>
+                    <div class="form-group">
+                        <label for="work-quantity">数量</label>
+                        <input type="number" id="work-quantity" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="work-notes">メモ</label>
+                        <textarea id="work-notes" placeholder="メモを入力"></textarea>
+                    </div>
+                </div>
+                
+                <div class="recent-works">
+                    <h3>最近の作業</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>作業名</th>
+                                    <th>部品番号</th>
+                                    <th>時間</th>
+                                    <th>日付</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- データは JavaScript で挿入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- レポート画面 -->
+            <div id="report-view" class="view-content">
+                <div class="toolbar">
+                    <h2>作業レポート</h2>
+                    <div class="tools">
+                        <button class="btn-export-all">全データ出力</button>
+                    </div>
+                </div>
+                
+                <div class="report-filters">
+                    <div class="form-group">
+                        <label for="date-from">開始日</label>
+                        <input type="date" id="date-from">
+                    </div>
+                    <div class="form-group">
+                        <label for="date-to">終了日</label>
+                        <input type="date" id="date-to">
+                    </div>
+                    <div class="form-group">
+                        <label for="filter-name">作業名</label>
+                        <input type="text" id="filter-name" placeholder="作業名で絞り込み">
+                    </div>
+                    <button class="btn-apply-filter">絞り込み適用</button>
+                </div>
+                
+                <div class="report-summary">
+                    <div class="summary-card">
+                        <h4>合計作業時間</h4>
+                        <div class="summary-value" id="total-time">00:00:00</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>総作業数</h4>
+                        <div class="summary-value" id="total-works">0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h4>平均作業時間</h4>
+                        <div class="summary-value" id="avg-time">00:00:00</div>
+                    </div>
+                </div>
+                
+                <div class="report-data">
+                    <h3>作業データ</h3>
+                    <div class="table-container">
+                        <table id="report-table">
+                            <thead>
+                                <tr>
+                                    <th>作業名</th>
+                                    <th>部品番号</th>
+                                    <th>数量</th>
+                                    <th>時間</th>
+                                    <th>日付</th>
+                                    <th>メモ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- データは JavaScript で挿入 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 設定画面 -->
+            <div id="settings-view" class="view-content">
+                <div class="toolbar">
+                    <h2>アプリ設定</h2>
+                    <div class="tools">
+                        <button class="btn-save-settings">設定を保存</button>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>データ管理</h3>
+                    <div class="setting-item">
+                        <button class="btn-backup">データのバックアップ</button>
+                        <p>現在のすべてのデータをJSONファイルとしてエクスポートします</p>
+                    </div>
+                    <div class="setting-item">
+                        <button class="btn-restore">データの復元</button>
+                        <p>バックアップしたJSONファイルからデータを復元します</p>
+                        <input type="file" id="restore-file" accept=".json" style="display: none;">
+                    </div>
+                    <div class="setting-item danger-zone">
+                        <button class="btn-clear-data">すべてのデータを削除</button>
+                        <p>警告: この操作は元に戻せません</p>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>表示設定</h3>
+                    <div class="setting-item">
+                        <label for="theme-select">テーマ</label>
+                        <select id="theme-select">
+                            <option value="light">ライト</option>
+                            <option value="dark">ダーク</option>
+                            <option value="system">システム設定に合わせる</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>アプリ情報</h3>
+                    <div class="setting-item">
+                        <p><strong>旋盤タイム</strong> バージョン 1.0.0</p>
+                        <p>旋盤作業の時間測定と管理のためのWebアプリ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- モバイル用のフッターナビゲーション -->
+        <div class="mobile-nav">
+            <div class="nav-item active" data-view="timer-view">
+                <span class="icon">⏱️</span>
+                <span class="label">測定</span>
+            </div>
+            <div class="nav-item" data-view="report-view">
+                <span class="icon">📊</span>
+                <span class="label">レポート</span>
+            </div>
+            <div class="nav-item" data-view="settings-view">
+                <span class="icon">⚙️</span>
+                <span class="label">設定</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Service Worker 登録 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }).catch(err => {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+    </script>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
