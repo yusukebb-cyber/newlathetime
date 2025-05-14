@@ -1372,6 +1372,8 @@ button .material-symbols-rounded {
     border: 1px solid var(--border-color);
     word-wrap: break-word;
     overflow-wrap: break-word;
+    white-space: normal;
+    hyphens: auto;
 }
 
 .help-table th {
@@ -1384,11 +1386,21 @@ button .material-symbols-rounded {
     width: 30%;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+    .help-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
     .help-table th,
     .help-table td {
         padding: 8px;
         font-size: 14px;
+    }
+    
+    .help-table td:first-child {
+        width: 80px;
+        min-width: 80px;
     }
 }
 
