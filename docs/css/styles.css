@@ -786,16 +786,74 @@ button .material-symbols-rounded {
     --light-bg: var(--dark-bg);
     --card-bg: #2c2c2c;
     --text-color: #f5f5f7;
+    --text-secondary: #bbbbbb;
     --border-color: #444;
+    --input-bg: #333;
+    color: var(--text-color);
+}
+
+/* ダークモード - テーブル */
+.dark-theme table {
+    border-color: #444;
 }
 
 .dark-theme table th {
     background-color: #383838;
+    color: var(--text-color);
 }
 
+.dark-theme table td {
+    border-color: #444;
+}
+
+/* ダークモード - 各セクション */
 .dark-theme .timer-section,
-.dark-theme .summary-card {
+.dark-theme .summary-card,
+.dark-theme .work-info,
+.dark-theme .form-group,
+.dark-theme .setting-item {
     background-color: #383838;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ダークモード - 入力フィールド */
+.dark-theme .form-group input, 
+.dark-theme .form-group textarea,
+.dark-theme .form-group select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: #555;
+}
+
+.dark-theme .input-wrapper {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .input-wrapper:focus-within {
+    box-shadow: 0 0 0 2px var(--primary-color), 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .scan-button {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.dark-theme .scan-button:hover {
+    background-color: var(--primary-dark);
+}
+
+/* ダークモード - ボタン */
+.dark-theme button {
+    background-color: #444;
+}
+
+.dark-theme button:hover {
+    background-color: #555;
+}
+
+/* ダークモード - モバイルナビ */
+.dark-theme .mobile-nav {
+    background-color: #2c2c2c;
+    border-top-color: #444;
 }
 
 /* モーダル関連 */

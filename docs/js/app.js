@@ -28,13 +28,8 @@ const clearDataBtn = document.querySelector('.btn-clear-data');
 const saveSettingsBtn = document.querySelector('.btn-save-settings');
 
 // 図面番号入力関連の要素
-const cameraBtn = document.getElementById('btn-camera');
 const imageBtn = document.getElementById('btn-image');
 const imageUpload = document.getElementById('image-upload');
-const cameraContainer = document.getElementById('camera-container');
-const cameraPreview = document.getElementById('camera-preview');
-const captureBtn = document.getElementById('btn-capture');
-const cancelCameraBtn = document.getElementById('btn-cancel-camera');
 const imageCanvas = document.getElementById('image-canvas');
 
 // ナビゲーション
@@ -59,10 +54,26 @@ let appSettings = {
 
 // ページ読み込み時の初期化
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('アプリ初期化開始');
     loadFromLocalStorage();
+    console.log('設定読み込み:', appSettings);
     loadSettings();
+    console.log('設定読み込み完了:', appSettings);
     setInitialDates();
+    
+    // ダークモード設定の確認（デバッグ用）
+    console.log('ダークモード設定:', appSettings.theme);
+    console.log('システムダークモード:', window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    // テーマを適用
     applyTheme();
+    
+    // テーマセレクトが変更されたらすぐに適用（設定保存ボタンを押さなくても）
+    themeSelect.addEventListener('change', () => {
+        appSettings.theme = themeSelect.value;
+        saveSettings();
+        applyTheme();
+    });
     
     // サービスワーカーの登録
     if ('serviceWorker' in navigator) {
@@ -84,21 +95,31 @@ function setInitialDates() {
 
 // テーマ適用
 function applyTheme() {
+    // 一度すべてのテーマ関連クラスを削除
+    document.body.classList.remove('dark-theme', 'light-theme');
+    
     if (appSettings.theme === 'dark') {
         document.body.classList.add('dark-theme');
+        document.documentElement.setAttribute('data-theme', 'dark');
     } else if (appSettings.theme === 'light') {
-        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        document.documentElement.setAttribute('data-theme', 'light');
     } else if (appSettings.theme === 'system') {
         // システム設定に合わせる
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('dark-theme');
+            document.documentElement.setAttribute('data-theme', 'dark');
         } else {
-            document.body.classList.remove('dark-theme');
+            document.body.classList.add('light-theme');
+            document.documentElement.setAttribute('data-theme', 'light');
         }
     }
     
     // セレクトボックスを現在の設定に合わせる
     themeSelect.value = appSettings.theme;
+    
+    // テーマが変更されたことをコンソールに出力（デバッグ用）
+    console.log('テーマを適用しました:', appSettings.theme);
 }
 
 // ナビゲーションの切り替え
@@ -307,29 +328,48 @@ function saveToLocalStorage() {
 
 // ローカルストレージから読み込み
 function loadFromLocalStorage() {
+    // 作業履歴データの読み込み
     const savedData = localStorage.getItem('latheTimeWorkHistory');
     if (savedData) {
-        workHistory = JSON.parse(savedData);
-        updateRecentWorksTable();
+        try {
+            workHistory = JSON.parse(savedData);
+            updateRecentWorksTable();
+            console.log('作業履歴を読み込みました:', workHistory.length + '件');
+        } catch (error) {
+            console.error('作業履歴の読み込みに失敗しました:', error);
+        }
     }
     
-    const savedSettings = localStorage.getItem('latheTimeSettings');
-    if (savedSettings) {
-        appSettings = JSON.parse(savedSettings);
-    }
+    // 設定の読み込みはloadSettings関数で行うため、ここでは削除
 }
 
 // 設定をローカルストレージに保存
 function saveSettings() {
-    localStorage.setItem('latheTimeSettings', JSON.stringify(appSettings));
+    try {
+        localStorage.setItem('latheTimeSettings', JSON.stringify(appSettings));
+        console.log('設定を保存しました:', appSettings);
+        return true;
+    } catch (error) {
+        console.error('設定の保存に失敗しました:', error);
+        return false;
+    }
 }
 
 // 設定を読み込み
 function loadSettings() {
-    const savedSettings = localStorage.getItem('latheTimeSettings');
-    if (savedSettings) {
-        appSettings = JSON.parse(savedSettings);
+    try {
+        const savedSettings = localStorage.getItem('latheTimeSettings');
+        if (savedSettings) {
+            const parsed = JSON.parse(savedSettings);
+            // 値をマージして既存のキーが欠けないようにする
+            appSettings = { ...appSettings, ...parsed };
+            console.log('設定を読み込みました:', appSettings);
+            return true;
+        }
+    } catch (error) {
+        console.error('設定の読み込みに失敗しました:', error);
     }
+    return false;
 }
 
 // 最近の作業テーブル更新
@@ -626,75 +666,6 @@ window.addEventListener('resize', () => {
     // 必要に応じてレイアウト調整ロジックを追加
 });
 
-// カメラボタンのイベントリスナー
-if (cameraBtn) {
-    cameraBtn.addEventListener('click', async () => {
-        try {
-            // カメラアクセスを要求
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-            
-            // プレビューにストリームをセット
-            cameraPreview.srcObject = stream;
-            
-            // カメラコンテナを表示
-            cameraContainer.style.display = 'block';
-            
-            // 撮影ボタンのイベント
-            const handleCapture = async () => {
-                // キャンバスにフレームを描画
-                const canvas = imageCanvas;
-                canvas.width = cameraPreview.videoWidth;
-                canvas.height = cameraPreview.videoHeight;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
-                
-                // 画像をDataURLとして取得
-                const imageDataUrl = canvas.toDataURL('image/jpeg');
-                
-                // ストリームを停止
-                stream.getTracks().forEach(track => track.stop());
-                
-                // カメラコンテナを非表示
-                cameraContainer.style.display = 'none';
-                
-                try {
-                    // 図面番号を抽出
-                    const drawingNumber = await processImageFromCamera(imageDataUrl);
-                    
-                    // nullの場合（キャンセルされた場合）は何もしない
-                    if (drawingNumber) {
-                        // 図面番号を入力欄に設定
-                        workNameInput.value = drawingNumber;
-                    }
-                } catch (error) {
-                    alert(`画像処理エラー: ${error.message}`);
-                }
-                
-                // イベントリスナーを削除
-                captureBtn.removeEventListener('click', handleCapture);
-            };
-            
-            // 撮影ボタンにイベントリスナーを追加
-            captureBtn.addEventListener('click', handleCapture);
-            
-            // キャンセルボタンのイベント
-            cancelCameraBtn.addEventListener('click', () => {
-                // ストリームを停止
-                stream.getTracks().forEach(track => track.stop());
-                
-                // カメラコンテナを非表示
-                cameraContainer.style.display = 'none';
-                
-                // イベントリスナーを削除
-                captureBtn.removeEventListener('click', handleCapture);
-            });
-            
-        } catch (error) {
-            console.error('カメラアクセスエラー:', error);
-            alert('カメラへのアクセスが拒否されたか、エラーが発生しました。');
-        }
-    });
-}
 
 // 画像アップロードボタンのイベントリスナー
 if (imageBtn) {
