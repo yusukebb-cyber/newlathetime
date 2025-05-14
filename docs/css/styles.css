@@ -1321,6 +1321,13 @@ button .material-symbols-rounded {
     max-width: 800px;
     width: 90%;
     max-height: 80vh;
+    overflow-x: hidden;
+}
+
+@media (max-width: 480px) {
+    .help-modal-content {
+        width: 95%;
+    }
 }
 
 .help-section {
@@ -1355,6 +1362,7 @@ button .material-symbols-rounded {
     width: 100%;
     border-collapse: collapse;
     margin: 16px 0;
+    table-layout: fixed;
 }
 
 .help-table th,
@@ -1362,6 +1370,8 @@ button .material-symbols-rounded {
     padding: 10px 12px;
     text-align: left;
     border: 1px solid var(--border-color);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .help-table th {
@@ -1372,6 +1382,14 @@ button .material-symbols-rounded {
 .help-table td:first-child {
     font-weight: 500;
     width: 30%;
+}
+
+@media (max-width: 480px) {
+    .help-table th,
+    .help-table td {
+        padding: 8px;
+        font-size: 14px;
+    }
 }
 
 /* ダークモード - ヘルプスタイル */
