@@ -687,6 +687,36 @@ button:disabled {
     border-color: var(--primary-color);
 }
 
+.text-selection-list li.selected {
+    background-color: rgba(52, 152, 219, 0.2);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.selected-preview {
+    background-color: rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.selected-text-preview {
+    font-size: 14px;
+    color: var(--primary-color);
+}
+
+.btn-small {
+    padding: 4px 8px;
+    font-size: 12px;
+    min-width: 60px;
+    height: 28px;
+}
+
 /* PWA関連 */
 @media (display-mode: standalone) {
     body {

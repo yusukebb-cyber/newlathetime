@@ -287,11 +287,16 @@
                 <button class="modal-close" onclick="closeTextModal()">×</button>
             </div>
             <div class="modal-body">
-                <p>画像から検出されたテキスト一覧です。図面番号として使用するテキストをクリックしてください。</p>
+                <p>画像から検出されたテキスト一覧です。図面番号として使用するテキストを2つまで選択できます。</p>
+                <div class="selected-preview">
+                    <div class="selected-text-preview" id="selected-text-preview">選択されたテキスト: </div>
+                    <button id="clear-selection" class="btn-small">クリア</button>
+                </div>
                 <ul id="detected-text-list" class="text-selection-list"></ul>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeTextModal()">キャンセル</button>
+                <button class="btn-primary" id="confirm-selection">選択を確定</button>
             </div>
         </div>
     </div>

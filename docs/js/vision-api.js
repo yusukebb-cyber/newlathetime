@@ -130,6 +130,21 @@ function showTextSelectionModal(textLines) {
     // モーダル要素を取得
     const textModal = document.getElementById('text-selection-modal');
     const textList = document.getElementById('detected-text-list');
+    const selectedTextPreview = document.getElementById('selected-text-preview');
+    const clearSelectionBtn = document.getElementById('clear-selection');
+    const confirmSelectionBtn = document.getElementById('confirm-selection');
+    
+    // 選択されたテキストを保存する配列
+    const selectedTexts = [];
+    
+    // 選択されたテキストのプレビューを更新
+    const updatePreview = () => {
+        if (selectedTexts.length === 0) {
+            selectedTextPreview.textContent = '選択されたテキスト: ';
+        } else {
+            selectedTextPreview.textContent = '選択されたテキスト: ' + selectedTexts.join(' ');
+        }
+    };
     
     // リストをクリア
     textList.innerHTML = '';
@@ -141,20 +156,57 @@ function showTextSelectionModal(textLines) {
         const listItem = document.createElement('li');
         listItem.textContent = line;
         listItem.addEventListener('click', () => {
-            // 選択された行を図面番号として設定
-            if (window.resolveDrawingNumber) {
-                window.resolveDrawingNumber(line);
+            // すでに選択済みの場合、選択解除
+            if (listItem.classList.contains('selected')) {
+                listItem.classList.remove('selected');
+                const index = selectedTexts.indexOf(line);
+                if (index > -1) {
+                    selectedTexts.splice(index, 1);
+                }
+            } 
+            // 選択されていない場合、選択（最大2つまで）
+            else if (selectedTexts.length < 2) {
+                listItem.classList.add('selected');
+                selectedTexts.push(line);
             }
             
-            // モーダルを閉じる
-            textModal.style.display = 'none';
+            // プレビューを更新
+            updatePreview();
         });
         
         textList.appendChild(listItem);
     });
     
+    // 選択クリアボタンのイベント
+    clearSelectionBtn.addEventListener('click', () => {
+        selectedTexts.length = 0;
+        updatePreview();
+        
+        // 選択状態をクリア
+        document.querySelectorAll('.text-selection-list li.selected').forEach(item => {
+            item.classList.remove('selected');
+        });
+    });
+    
+    // 確定ボタンのイベント
+    confirmSelectionBtn.addEventListener('click', () => {
+        // 選択されたテキストを半角スペースで結合
+        const combinedText = selectedTexts.join(' ');
+        
+        // コールバック関数を呼び出し
+        if (window.resolveDrawingNumber) {
+            window.resolveDrawingNumber(combinedText || null);
+        }
+        
+        // モーダルを閉じる
+        textModal.style.display = 'none';
+    });
+    
     // モーダルを表示
     textModal.style.display = 'flex';
+    
+    // 初期表示
+    updatePreview();
 }
 
 // テキスト選択モーダルを閉じる
