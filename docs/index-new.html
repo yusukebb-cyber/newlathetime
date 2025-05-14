@@ -36,6 +36,7 @@
                 <div class="toolbar">
                     <h2><span class="material-symbols-rounded">timer</span>作業時間測定</h2>
                     <div class="tools">
+                        <button id="btn-help" class="btn-help" title="ヘルプを表示">ヘルプ</button>
                         <button class="btn-new"><span class="material-symbols-rounded">add</span>新規作業</button>
                         <button class="btn-export"><span class="material-symbols-rounded">download</span>データ出力</button>
                     </div>
@@ -302,6 +303,76 @@
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeApiKeyModal()">キャンセル</button>
                 <button class="btn-primary" onclick="saveAndCloseApiKeyModal()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ヘルプモーダル -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content help-modal-content">
+            <div class="modal-header">
+                <h3>旋盤タイム ヘルプ</h3>
+                <button class="modal-close" onclick="closeHelpModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="help-section">
+                    <h4>基本的な使い方</h4>
+                    <ol>
+                        <li>図面番号、作業内容、数量を入力します</li>
+                        <li>「開始」ボタンを押して作業時間の測定を開始します</li>
+                        <li>作業が終了したら「停止」ボタンを押して記録を保存します</li>
+                        <li>「新規作業」ボタンで次の作業に移ります</li>
+                    </ol>
+                </div>
+                
+                <div class="help-section">
+                    <h4>図面番号の読み取り</h4>
+                    <p>「画像から読み取り」ボタンを押すと、カメラやファイルから図面番号を自動読み取りできます。</p>
+                    <p>初回利用時には Google Cloud Vision API キーの設定が必要です。</p>
+                </div>
+                
+                <div class="help-section">
+                    <h4>レポート画面の指標について</h4>
+                    <table class="help-table">
+                        <tr>
+                            <th>指標名</th>
+                            <th>説明</th>
+                        </tr>
+                        <tr>
+                            <td>合計作業時間</td>
+                            <td>指定期間内のすべての作業時間の合計</td>
+                        </tr>
+                        <tr>
+                            <td>総数量</td>
+                            <td>指定期間内に作業した品物の合計個数</td>
+                        </tr>
+                        <tr>
+                            <td>記録件数</td>
+                            <td>開始ボタンから停止ボタンまでの一連の作業記録の数</td>
+                        </tr>
+                        <tr>
+                            <td>図面枚数</td>
+                            <td>指定期間内に作業した図面の種類数（重複を除く）</td>
+                        </tr>
+                        <tr>
+                            <td>1件あたり時間</td>
+                            <td>作業記録1件あたりの平均作業時間</td>
+                        </tr>
+                        <tr>
+                            <td>1個あたり時間</td>
+                            <td>品物1個あたりの平均作業時間</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="help-section">
+                    <h4>データの保存について</h4>
+                    <p>すべてのデータはブラウザ内に保存されます。定期的にバックアップすることをお勧めします。</p>
+                    <p>設定画面から「データのバックアップ」でJSONファイルにデータを保存できます。</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" onclick="closeHelpModal()">閉じる</button>
             </div>
         </div>
     </div>

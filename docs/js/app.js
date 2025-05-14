@@ -81,6 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // APIキー管理ボタンのイベントリスナー
     initApiKeyManagement();
     
+    // ヘルプボタンの設定
+    initHelpButton();
+    
     // サービスワーカーの登録
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./service-worker.js')
@@ -127,6 +130,30 @@ function initApiKeyManagement() {
                 }
             }
         });
+    }
+}
+
+// ヘルプボタンの初期化
+function initHelpButton() {
+    const helpBtn = document.getElementById('btn-help');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', showHelpModal);
+    }
+}
+
+// ヘルプモーダルを表示
+function showHelpModal() {
+    const helpModal = document.getElementById('help-modal');
+    if (helpModal) {
+        helpModal.style.display = 'flex';
+    }
+}
+
+// ヘルプモーダルを閉じる
+function closeHelpModal() {
+    const helpModal = document.getElementById('help-modal');
+    if (helpModal) {
+        helpModal.style.display = 'none';
     }
 }
 
