@@ -22,6 +22,7 @@ const totalWorksDisplay = document.getElementById('total-works');
 const totalQuantityDisplay = document.getElementById('total-quantity');
 const uniqueDrawingsDisplay = document.getElementById('unique-drawings');
 const avgTimeDisplay = document.getElementById('avg-time');
+const avgTimePerItemDisplay = document.getElementById('avg-time-per-item');
 const themeSelect = document.getElementById('theme-select');
 const backupBtn = document.querySelector('.btn-backup');
 const restoreBtn = document.querySelector('.btn-restore');
@@ -508,8 +509,8 @@ function updateReportData() {
 
 // 集計データを更新
 function updateSummaryData(data) {
-    const totalWorks = data.length; // 作業回数
-    let totalTimeMs = 0;
+    const totalWorks = data.length; // 記録件数
+    let totalTimeMs = 0; // 合計作業時間（ミリ秒）
     let totalQuantity = 0; // 総数量
     
     // 図面枚数を計算（ユニークな図面番号の数）
@@ -518,8 +519,9 @@ function updateSummaryData(data) {
     data.forEach(work => {
         totalTimeMs += work.timeRaw;
         
-        // 品物の数量を集計
-        totalQuantity += work.quantity || 0;
+        // 品物の数量を集計（0または未設定の場合は1とカウント）
+        const quantity = parseInt(work.quantity, 10) || 1;
+        totalQuantity += quantity;
         
         // 空白や「番号なし」でない有効な図面番号のみを数える
         if (work.name && work.name.trim() !== '' && work.name !== '番号なし') {
@@ -528,14 +530,20 @@ function updateSummaryData(data) {
     });
     
     const uniqueDrawingsCount = uniqueDrawings.size;
-    const avgTimeMs = totalWorks > 0 ? Math.floor(totalTimeMs / totalWorks) : 0;
+    
+    // 1件あたりの平均時間（記録1件あたりの作業時間）
+    const avgTimePerRecordMs = totalWorks > 0 ? Math.floor(totalTimeMs / totalWorks) : 0;
+    
+    // 1個あたりの平均時間（製品1個あたりの作業時間）
+    const avgTimePerItemMs = totalQuantity > 0 ? Math.floor(totalTimeMs / totalQuantity) : 0;
     
     // 表示を更新
     totalWorksDisplay.textContent = totalWorks;
     totalQuantityDisplay.textContent = totalQuantity;
     totalTimeDisplay.textContent = formatTimeForSave(totalTimeMs);
     uniqueDrawingsDisplay.textContent = uniqueDrawingsCount;
-    avgTimeDisplay.textContent = formatTimeForSave(avgTimeMs);
+    avgTimeDisplay.textContent = formatTimeForSave(avgTimePerRecordMs);
+    avgTimePerItemDisplay.textContent = formatTimeForSave(avgTimePerItemMs);
 }
 
 // 作業データをコピー
