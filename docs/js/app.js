@@ -27,6 +27,16 @@ const restoreFileInput = document.getElementById('restore-file');
 const clearDataBtn = document.querySelector('.btn-clear-data');
 const saveSettingsBtn = document.querySelector('.btn-save-settings');
 
+// 図面番号入力関連の要素
+const cameraBtn = document.getElementById('btn-camera');
+const imageBtn = document.getElementById('btn-image');
+const imageUpload = document.getElementById('image-upload');
+const cameraContainer = document.getElementById('camera-container');
+const cameraPreview = document.getElementById('camera-preview');
+const captureBtn = document.getElementById('btn-capture');
+const cancelCameraBtn = document.getElementById('btn-cancel-camera');
+const imageCanvas = document.getElementById('image-canvas');
+
 // ナビゲーション
 const menuItems = document.querySelectorAll('.menu li');
 const navItems = document.querySelectorAll('.mobile-nav .nav-item');
@@ -615,3 +625,101 @@ if (window.matchMedia) {
 window.addEventListener('resize', () => {
     // 必要に応じてレイアウト調整ロジックを追加
 });
+
+// カメラボタンのイベントリスナー
+if (cameraBtn) {
+    cameraBtn.addEventListener('click', async () => {
+        try {
+            // カメラアクセスを要求
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+            
+            // プレビューにストリームをセット
+            cameraPreview.srcObject = stream;
+            
+            // カメラコンテナを表示
+            cameraContainer.style.display = 'block';
+            
+            // 撮影ボタンのイベント
+            const handleCapture = async () => {
+                // キャンバスにフレームを描画
+                const canvas = imageCanvas;
+                canvas.width = cameraPreview.videoWidth;
+                canvas.height = cameraPreview.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(cameraPreview, 0, 0, canvas.width, canvas.height);
+                
+                // 画像をDataURLとして取得
+                const imageDataUrl = canvas.toDataURL('image/jpeg');
+                
+                // ストリームを停止
+                stream.getTracks().forEach(track => track.stop());
+                
+                // カメラコンテナを非表示
+                cameraContainer.style.display = 'none';
+                
+                try {
+                    // 図面番号を抽出
+                    const drawingNumber = await processImageFromCamera(imageDataUrl);
+                    
+                    // nullの場合（キャンセルされた場合）は何もしない
+                    if (drawingNumber) {
+                        // 図面番号を入力欄に設定
+                        workNameInput.value = drawingNumber;
+                    }
+                } catch (error) {
+                    alert(`画像処理エラー: ${error.message}`);
+                }
+                
+                // イベントリスナーを削除
+                captureBtn.removeEventListener('click', handleCapture);
+            };
+            
+            // 撮影ボタンにイベントリスナーを追加
+            captureBtn.addEventListener('click', handleCapture);
+            
+            // キャンセルボタンのイベント
+            cancelCameraBtn.addEventListener('click', () => {
+                // ストリームを停止
+                stream.getTracks().forEach(track => track.stop());
+                
+                // カメラコンテナを非表示
+                cameraContainer.style.display = 'none';
+                
+                // イベントリスナーを削除
+                captureBtn.removeEventListener('click', handleCapture);
+            });
+            
+        } catch (error) {
+            console.error('カメラアクセスエラー:', error);
+            alert('カメラへのアクセスが拒否されたか、エラーが発生しました。');
+        }
+    });
+}
+
+// 画像アップロードボタンのイベントリスナー
+if (imageBtn) {
+    imageBtn.addEventListener('click', () => {
+        imageUpload.click();
+    });
+    
+    imageUpload.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        try {
+            // 図面番号を抽出
+            const drawingNumber = await processUploadedImage(file);
+            
+            // nullの場合（キャンセルされた場合）は何もしない
+            if (drawingNumber) {
+                // 図面番号を入力欄に設定
+                workNameInput.value = drawingNumber;
+            }
+        } catch (error) {
+            alert(`画像処理エラー: ${error.message}`);
+        }
+        
+        // ファイル選択をリセット（同じファイルを再選択できるように）
+        imageUpload.value = '';
+    });
+}
