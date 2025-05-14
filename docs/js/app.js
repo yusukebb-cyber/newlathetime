@@ -831,13 +831,34 @@ function restoreTimerState() {
         const timerState = JSON.parse(savedState);
         console.log('タイマー状態を復元しています:', timerState);
         
-        // 最終更新から2日以上経過している場合は自動的に停止とみなす
+        // 曜日を考慮したタイムアウト処理
         const lastUpdated = new Date(timerState.lastUpdated);
         const now = new Date();
-        const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
         
-        if (hoursDiff > 48) {
-            console.log('タイマーが48時間以上経過しています。自動的に停止します。');
+        // 最終更新の曜日（0=日曜日, 1=月曜日, ..., 6=土曜日）
+        const lastUpdatedDay = lastUpdated.getDay();
+        const currentDay = now.getDay();
+        
+        // 時間差（ミリ秒）
+        const timeDiff = now - lastUpdated;
+        const hoursDiff = timeDiff / (1000 * 60 * 60);
+        
+        // タイムアウト判定ロジック
+        let shouldTimeout = false;
+        
+        // 金曜（5）→ 月曜（1）の特別パターン：最大72時間まで許容
+        if (lastUpdatedDay === 5 && currentDay === 1) {
+            // 金曜から月曜への場合、72時間以上経過していればタイムアウト
+            shouldTimeout = hoursDiff > 80; // 少し余裕を持たせて80時間
+            console.log('金曜から月曜への遷移を検出: 経過時間=', hoursDiff);
+        }
+        // 通常パターン：48時間までを許容
+        else {
+            shouldTimeout = hoursDiff > 48;
+        }
+        
+        if (shouldTimeout) {
+            console.log(`タイマーが長時間(${hoursDiff.toFixed(1)}時間)経過しています。自動的に停止します。`);
             clearTimerState();
             return;
         }
