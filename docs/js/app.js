@@ -75,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
         applyTheme();
     });
     
+    // APIキー管理ボタンのイベントリスナー
+    initApiKeyManagement();
+    
     // サービスワーカーの登録
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./service-worker.js')
@@ -82,6 +85,47 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.log('Service Worker registration failed:', err));
     }
 });
+
+// APIキー管理機能の初期化
+function initApiKeyManagement() {
+    // APIキーの表示を初期化
+    if (typeof updateApiKeyDisplay === 'function') {
+        updateApiKeyDisplay();
+    }
+    
+    // APIキーの表示/非表示切り替えボタン
+    const showKeyBtn = document.getElementById('btn-show-key');
+    if (showKeyBtn) {
+        showKeyBtn.addEventListener('click', () => {
+            if (typeof toggleApiKeyVisibility === 'function') {
+                toggleApiKeyVisibility();
+            }
+        });
+    }
+    
+    // APIキー編集ボタン
+    const editApiKeyBtn = document.getElementById('btn-edit-api-key');
+    if (editApiKeyBtn) {
+        editApiKeyBtn.addEventListener('click', () => {
+            if (typeof showApiKeyModal === 'function') {
+                showApiKeyModal();
+            }
+        });
+    }
+    
+    // APIキークリアボタン
+    const clearApiKeyBtn = document.getElementById('btn-clear-api-key');
+    if (clearApiKeyBtn) {
+        clearApiKeyBtn.addEventListener('click', () => {
+            if (confirm('本当にAPIキーを削除しますか？\n図面番号の読み取り機能が使用できなくなります。')) {
+                if (typeof clearApiKey === 'function') {
+                    clearApiKey();
+                    alert('APIキーを削除しました。');
+                }
+            }
+        });
+    }
+}
 
 // 初期日付設定
 function setInitialDates() {

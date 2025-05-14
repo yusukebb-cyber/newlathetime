@@ -203,6 +203,23 @@
                 </div>
                 
                 <div class="settings-section">
+                    <h3>API設定</h3>
+                    <div class="setting-item">
+                        <h4>Google Cloud Vision API</h4>
+                        <p>図面番号の読み取りに使用するAPIキーを設定します。</p>
+                        <div class="api-key-display">
+                            <input type="password" id="api-key-display" readonly placeholder="APIキーが設定されていません">
+                            <button id="btn-show-key" type="button" title="APIキーを表示">表示</button>
+                        </div>
+                        <div class="api-key-actions">
+                            <button id="btn-edit-api-key" type="button">APIキーを変更</button>
+                            <button id="btn-clear-api-key" type="button" class="btn-secondary">APIキーを削除</button>
+                        </div>
+                        <p class="note">※APIキーはこのデバイスのブラウザ内に保存され、外部には送信されません。</p>
+                    </div>
+                </div>
+                
+                <div class="settings-section">
                     <h3>アプリ情報</h3>
                     <div class="setting-item">
                         <p><strong>旋盤タイム</strong> バージョン 1.0.0</p>

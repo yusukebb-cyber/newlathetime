@@ -1,12 +1,19 @@
 // Google Cloud Vision API 関連の機能
 
-// APIキーを保存・取得
+// APIキーを保存・取得・削除
 function saveApiKey(key) {
     localStorage.setItem('visionApiKey', key);
+    updateApiKeyDisplay(); // 表示を更新
 }
 
 function getApiKey() {
     return localStorage.getItem('visionApiKey') || '';
+}
+
+function clearApiKey() {
+    localStorage.removeItem('visionApiKey');
+    updateApiKeyDisplay(); // 表示を更新
+    return true;
 }
 
 // APIキー設定用モーダルを表示
@@ -37,6 +44,47 @@ function saveAndCloseApiKeyModal() {
 function closeApiKeyModal() {
     const apiKeyModal = document.getElementById('api-key-modal');
     apiKeyModal.style.display = 'none';
+}
+
+// 設定画面のAPIキー表示を更新
+function updateApiKeyDisplay() {
+    const apiKeyDisplay = document.getElementById('api-key-display');
+    const apiKey = getApiKey();
+    
+    if (apiKeyDisplay) {
+        if (apiKey) {
+            // 最初の4文字と最後の4文字を表示し、間は*で隠す
+            const masked = maskApiKey(apiKey);
+            apiKeyDisplay.value = masked;
+            apiKeyDisplay.placeholder = '';
+        } else {
+            apiKeyDisplay.value = '';
+            apiKeyDisplay.placeholder = 'APIキーが設定されていません';
+        }
+    }
+}
+
+// APIキーをマスクする（セキュリティのため）
+function maskApiKey(key) {
+    if (!key || key.length < 8) return '********';
+    const firstFour = key.substring(0, 4);
+    const lastFour = key.substring(key.length - 4);
+    const middleMask = '*'.repeat(Math.min(8, key.length - 8));
+    return `${firstFour}${middleMask}${lastFour}`;
+}
+
+// APIキーの表示/非表示を切り替える
+function toggleApiKeyVisibility() {
+    const apiKeyDisplay = document.getElementById('api-key-display');
+    const showKeyBtn = document.getElementById('btn-show-key');
+    
+    if (apiKeyDisplay.type === 'password') {
+        apiKeyDisplay.type = 'text';
+        showKeyBtn.textContent = '隠す';
+    } else {
+        apiKeyDisplay.type = 'password';
+        showKeyBtn.textContent = '表示';
+    }
 }
 
 // 画像をBase64にエンコード
@@ -220,23 +268,6 @@ function closeTextModal() {
     }
 }
 
-// カメラで撮影した画像から図面番号を抽出
-async function processImageFromCamera(imageDataUrl) {
-    try {
-        // Data URLをBlobに変換
-        const res = await fetch(imageDataUrl);
-        const blob = await res.blob();
-        
-        // File オブジェクトに変換
-        const file = new File([blob], "camera-image.jpg", { type: "image/jpeg" });
-        
-        // 図面番号を抽出
-        return await extractDrawingNumberFromImage(file);
-    } catch (error) {
-        console.error('カメラ画像処理エラー:', error);
-        throw error;
-    }
-}
 
 // アップロードされた画像から図面番号を抽出
 async function processUploadedImage(file) {
