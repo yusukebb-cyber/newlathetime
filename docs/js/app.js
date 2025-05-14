@@ -48,6 +48,10 @@ let elapsedTime = 0;
 let timerInterval;
 let timerRunning = false;
 let timerPaused = false;
+let wakeLock = null; // スクリーンをオンに保つためのWakeLock
+
+// タイマー状態の永続化キー
+const TIMER_STATE_KEY = 'latheTimeTimerState';
 
 // 保存データ配列
 let workHistory = [];
@@ -73,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // テーマを適用
     applyTheme();
     
+    // 進行中のタイマーがあれば復元
+    restoreTimerState();
+    
     // テーマセレクトが変更されたらすぐに適用（設定保存ボタンを押さなくても）
     themeSelect.addEventListener('change', () => {
         appSettings.theme = themeSelect.value;
@@ -92,6 +99,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(reg => console.log('Service Worker registered'))
             .catch(err => console.log('Service Worker registration failed:', err));
     }
+    
+    // ページがアンロードされる前にタイマー状態を保存
+    window.addEventListener('beforeunload', saveTimerState);
 });
 
 // APIキー管理機能の初期化
@@ -274,6 +284,9 @@ function startTimer() {
         
         // 画面をスリープさせない（可能な場合）
         keepScreenAwake(true);
+        
+        // タイマー状態を保存
+        saveTimerState();
     }
 }
 
@@ -292,6 +305,9 @@ function pauseTimer() {
         
         // 画面スリープを許可
         keepScreenAwake(false);
+        
+        // タイマー状態を保存
+        saveTimerState();
     }
 }
 
@@ -315,6 +331,9 @@ function stopTimer() {
         
         // 画面スリープを許可
         keepScreenAwake(false);
+        
+        // タイマー状態を削除
+        clearTimerState();
     }
 }
 
@@ -613,6 +632,9 @@ function startNewWork() {
     // タイマーリセット
     resetTimer();
     
+    // タイマー状態を削除
+    clearTimerState();
+    
     // 図面番号入力フィールドにフォーカス
     workNameInput.focus();
 }
@@ -730,6 +752,8 @@ function clearAllData() {
         workHistory = [];
         saveToLocalStorage();
         updateRecentWorksTable();
+        clearTimerState();
+        resetTimer();
         alert('すべてのデータを削除しました。');
     }
 }
@@ -776,6 +800,106 @@ if (window.matchMedia) {
 window.addEventListener('resize', () => {
     // 必要に応じてレイアウト調整ロジックを追加
 });
+
+// タイマー状態をローカルストレージに保存
+function saveTimerState() {
+    if (timerRunning || timerPaused) {
+        const timerState = {
+            startTime: startTime,
+            startDate: startDate ? startDate.toISOString() : null,
+            elapsedTime: elapsedTime,
+            timerRunning: timerRunning,
+            timerPaused: timerPaused,
+            workName: workNameInput.value,
+            workPart: workPartInput.value,
+            workQuantity: workQuantityInput.value,
+            workNotes: workNotesInput.value,
+            lastUpdated: new Date().toISOString()
+        };
+        
+        localStorage.setItem(TIMER_STATE_KEY, JSON.stringify(timerState));
+        console.log('タイマー状態を保存しました');
+    }
+}
+
+// タイマー状態をローカルストレージから復元
+function restoreTimerState() {
+    try {
+        const savedState = localStorage.getItem(TIMER_STATE_KEY);
+        if (!savedState) return;
+        
+        const timerState = JSON.parse(savedState);
+        console.log('タイマー状態を復元しています:', timerState);
+        
+        // 最終更新から2日以上経過している場合は自動的に停止とみなす
+        const lastUpdated = new Date(timerState.lastUpdated);
+        const now = new Date();
+        const hoursDiff = (now - lastUpdated) / (1000 * 60 * 60);
+        
+        if (hoursDiff > 48) {
+            console.log('タイマーが48時間以上経過しています。自動的に停止します。');
+            clearTimerState();
+            return;
+        }
+        
+        // フォーム入力を復元
+        workNameInput.value = timerState.workName || '';
+        workPartInput.value = timerState.workPart || '';
+        workQuantityInput.value = timerState.workQuantity || '1';
+        workNotesInput.value = timerState.workNotes || '';
+        
+        // タイマー状態を復元
+        if (timerState.startDate) {
+            startDate = new Date(timerState.startDate);
+            const formattedDate = startDate.toLocaleDateString() + ' ' + 
+                               startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            startDateDisplay.textContent = '開始: ' + formattedDate;
+        }
+        
+        // 経過時間を計算
+        if (timerState.timerRunning) {
+            // 実行中だった場合は最終更新からの経過時間も加算
+            startTime = Date.now() - (timerState.elapsedTime + (now - lastUpdated));
+            elapsedTime = Date.now() - startTime;
+            
+            // タイマーを再開
+            timerInterval = setInterval(updateTimer, 1000);
+            timerRunning = true;
+            timerPaused = false;
+            statusDisplay.textContent = '測定中';
+            statusDisplay.style.color = '#2ecc71';
+            
+            // ボタン状態更新
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stopBtn.disabled = false;
+        } else if (timerState.timerPaused) {
+            // 一時停止中だった場合
+            elapsedTime = timerState.elapsedTime;
+            timerRunning = false;
+            timerPaused = true;
+            displayTime(elapsedTime);
+            statusDisplay.textContent = '一時停止中';
+            statusDisplay.style.color = '#f39c12';
+            
+            // ボタン状態更新
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stopBtn.disabled = false;
+        }
+        
+        console.log('タイマー状態を復元しました');
+    } catch (error) {
+        console.error('タイマー状態の復元中にエラーが発生しました:', error);
+        clearTimerState();
+    }
+}
+
+// タイマー状態をローカルストレージから削除
+function clearTimerState() {
+    localStorage.removeItem(TIMER_STATE_KEY);
+    console.log('タイマー状態を削除しました');
+}
 
 
 // 画像アップロードボタンのイベントリスナー
