@@ -1,6 +1,7 @@
 // DOM要素
 const timeDisplay = document.querySelector('.time');
 const statusDisplay = document.querySelector('.status');
+const startDateDisplay = document.querySelector('.start-date');
 const startBtn = document.querySelector('.btn-start');
 const pauseBtn = document.querySelector('.btn-pause');
 const stopBtn = document.querySelector('.btn-stop');
@@ -42,6 +43,7 @@ const viewContents = document.querySelectorAll('.view-content');
 
 // タイマー変数
 let startTime = 0;
+let startDate = null;
 let elapsedTime = 0;
 let timerInterval;
 let timerRunning = false;
@@ -250,6 +252,15 @@ navItems.forEach(item => {
 function startTimer() {
     if (!timerRunning) {
         startTime = Date.now() - elapsedTime;
+        
+        // 新しく作業を開始する場合（一時停止からの再開ではない場合）は開始日時を記録
+        if (!timerPaused && elapsedTime === 0) {
+            startDate = new Date();
+            const formattedDate = startDate.toLocaleDateString() + ' ' + 
+                                  startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            startDateDisplay.textContent = '開始: ' + formattedDate;
+        }
+        
         timerInterval = setInterval(updateTimer, 1000);
         timerRunning = true;
         timerPaused = false;
@@ -333,7 +344,9 @@ function resetTimer() {
     elapsedTime = 0;
     timerRunning = false;
     timerPaused = false;
+    startDate = null;
     timeDisplay.textContent = '00:00:00';
+    startDateDisplay.textContent = '';
 }
 
 // タイマー表示を更新
@@ -369,6 +382,7 @@ function saveWorkData() {
             time: workTime,
             timeRaw: elapsedTime,
             date: workDate,
+            startDate: startDate ? startDate.toISOString() : null,
             notes: workNotesInput.value,
             timestamp: Date.now()
         };
