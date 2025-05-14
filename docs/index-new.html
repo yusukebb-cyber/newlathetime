@@ -18,14 +18,14 @@
     <div class="app-container">
         <div class="sidebar">
             <div class="app-logo">
-                <img src="images/lathe-icon.svg" alt="旋盤アイコン">
+                <img src="images/icons/app-logo.png" alt="旋盤アイコン">
                 <h1>旋盤タイム</h1>
             </div>
             <nav class="menu">
                 <ul>
-                    <li class="active" data-view="timer-view"><span class="material-symbols-rounded">timer</span> <span class="menu-text">測定</span></li>
-                    <li data-view="report-view"><span class="material-symbols-rounded">bar_chart</span> <span class="menu-text">レポート</span></li>
-                    <li data-view="settings-view"><span class="material-symbols-rounded">settings</span> <span class="menu-text">設定</span></li>
+                    <li class="active" data-view="timer-view"><img src="images/icons/timer-icon.png" class="nav-icon" alt="タイマー"> <span class="menu-text">測定</span></li>
+                    <li data-view="report-view"><img src="images/icons/report-icon.png" class="nav-icon" alt="レポート"> <span class="menu-text">レポート</span></li>
+                    <li data-view="settings-view"><img src="images/icons/settings-icon.png" class="nav-icon" alt="設定"> <span class="menu-text">設定</span></li>
                 </ul>
             </nav>
         </div>
@@ -58,16 +58,11 @@
                         <label for="work-name">図面番号</label>
                         <div class="input-with-buttons">
                             <input type="text" id="work-name" placeholder="図面番号を入力">
-                            <button type="button" id="btn-camera" title="カメラで読み取り"><span class="material-symbols-rounded">photo_camera</span></button>
-                            <button type="button" id="btn-image" title="画像から読み取り"><span class="material-symbols-rounded">image</span></button>
-                            <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                        </div>
-                        <div id="camera-container" style="display: none;">
-                            <video id="camera-preview" autoplay playsinline style="width: 100%; border-radius: 4px;"></video>
-                            <div class="camera-controls">
-                                <button type="button" id="btn-capture"><span class="material-symbols-rounded">photo_camera</span>撮影</button>
-                                <button type="button" id="btn-cancel-camera"><span class="material-symbols-rounded">close</span>キャンセル</button>
-                            </div>
+                            <button type="button" id="btn-image" title="画像から読み取り">
+                                <img src="images/icons/scan-icon.png" class="button-icon" alt="スキャン">
+                                画像から読み取り
+                            </button>
+                            <input type="file" id="image-upload" accept="image/*" capture="environment" style="display: none;">
                         </div>
                         <canvas id="image-canvas" style="display: none;"></canvas>
                     </div>
@@ -219,15 +214,15 @@
         <!-- モバイル用のフッターナビゲーション -->
         <div class="mobile-nav">
             <div class="nav-item active" data-view="timer-view">
-                <span class="material-symbols-rounded">timer</span>
+                <img src="images/icons/timer-icon.png" class="nav-icon" alt="タイマー">
                 <span class="label">測定</span>
             </div>
             <div class="nav-item" data-view="report-view">
-                <span class="material-symbols-rounded">bar_chart</span>
+                <img src="images/icons/report-icon.png" class="nav-icon" alt="レポート">
                 <span class="label">レポート</span>
             </div>
             <div class="nav-item" data-view="settings-view">
-                <span class="material-symbols-rounded">settings</span>
+                <img src="images/icons/settings-icon.png" class="nav-icon" alt="設定">
                 <span class="label">設定</span>
             </div>
         </div>

@@ -131,8 +131,15 @@ body {
     font-weight: 500;
 }
 
-.menu .icon {
+.menu .icon, .menu .nav-icon {
     margin-right: 16px;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
 }
 
 /* メインコンテンツ */
@@ -318,14 +325,22 @@ body {
 
 .input-with-buttons button {
     min-width: unset;
-    width: 48px;
-    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--secondary-color);
-    border-radius: var(--radius-small);
-    transition: all var(--transition-speed);
+    padding: 0 12px;
+    height: 48px;
+    
+    /* スキャンボタン用に幅を調整 */
+    width: auto;
+}
+
+.button-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 8px;
 }
 
 .input-with-buttons button:hover {
@@ -686,8 +701,10 @@ button .material-symbols-rounded {
     transform: scale(0.95);
 }
 
-.nav-item .material-symbols-rounded {
+.nav-item .material-symbols-rounded, .nav-item .nav-icon {
     font-size: 28px;
+    width: 28px;
+    height: 28px;
     margin-bottom: 4px;
 }
 
