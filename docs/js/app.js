@@ -19,6 +19,7 @@ const filterNameInput = document.getElementById('filter-name');
 const applyFilterBtn = document.querySelector('.btn-apply-filter');
 const totalTimeDisplay = document.getElementById('total-time');
 const totalWorksDisplay = document.getElementById('total-works');
+const uniqueDrawingsDisplay = document.getElementById('unique-drawings');
 const avgTimeDisplay = document.getElementById('avg-time');
 const themeSelect = document.getElementById('theme-select');
 const backupBtn = document.querySelector('.btn-backup');
@@ -509,14 +510,25 @@ function updateSummaryData(data) {
     const totalWorks = data.length;
     let totalTimeMs = 0;
     
+    // 図面枚数を計算（ユニークな図面番号の数）
+    const uniqueDrawings = new Set();
+    
     data.forEach(work => {
         totalTimeMs += work.timeRaw;
+        
+        // 空白や「番号なし」でない有効な図面番号のみを数える
+        if (work.name && work.name.trim() !== '' && work.name !== '番号なし') {
+            uniqueDrawings.add(work.name);
+        }
     });
     
+    const uniqueDrawingsCount = uniqueDrawings.size;
     const avgTimeMs = totalWorks > 0 ? Math.floor(totalTimeMs / totalWorks) : 0;
     
+    // 表示を更新
     totalWorksDisplay.textContent = totalWorks;
     totalTimeDisplay.textContent = formatTimeForSave(totalTimeMs);
+    uniqueDrawingsDisplay.textContent = uniqueDrawingsCount;
     avgTimeDisplay.textContent = formatTimeForSave(avgTimeMs);
 }
 
