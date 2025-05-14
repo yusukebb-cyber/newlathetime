@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="images/lathe-icon.svg">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap">
     <meta name="theme-color" content="#3498DB">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,9 +23,9 @@
             </div>
             <nav class="menu">
                 <ul>
-                    <li class="active" data-view="timer-view"><span class="icon">⏱️</span> <span class="menu-text">測定</span></li>
-                    <li data-view="report-view"><span class="icon">📊</span> <span class="menu-text">レポート</span></li>
-                    <li data-view="settings-view"><span class="icon">⚙️</span> <span class="menu-text">設定</span></li>
+                    <li class="active" data-view="timer-view"><span class="material-symbols-rounded">timer</span> <span class="menu-text">測定</span></li>
+                    <li data-view="report-view"><span class="material-symbols-rounded">bar_chart</span> <span class="menu-text">レポート</span></li>
+                    <li data-view="settings-view"><span class="material-symbols-rounded">settings</span> <span class="menu-text">設定</span></li>
                 </ul>
             </nav>
         </div>
@@ -32,10 +34,10 @@
             <!-- タイマー画面 -->
             <div id="timer-view" class="view-content active">
                 <div class="toolbar">
-                    <h2>作業時間測定</h2>
+                    <h2><span class="material-symbols-rounded">timer</span>作業時間測定</h2>
                     <div class="tools">
-                        <button class="btn-new">新規作業</button>
-                        <button class="btn-export">データ出力</button>
+                        <button class="btn-new"><span class="material-symbols-rounded">add</span>新規作業</button>
+                        <button class="btn-export"><span class="material-symbols-rounded">download</span>データ出力</button>
                     </div>
                 </div>
                 
@@ -45,9 +47,9 @@
                         <div class="status">停止中</div>
                     </div>
                     <div class="timer-controls">
-                        <button class="btn-start">開始</button>
-                        <button class="btn-pause" disabled>一時停止</button>
-                        <button class="btn-stop" disabled>停止</button>
+                        <button class="btn-start"><span class="material-symbols-rounded">play_arrow</span>開始</button>
+                        <button class="btn-pause" disabled><span class="material-symbols-rounded">pause</span>一時停止</button>
+                        <button class="btn-stop" disabled><span class="material-symbols-rounded">stop</span>停止</button>
                     </div>
                 </div>
                 
@@ -56,15 +58,15 @@
                         <label for="work-name">図面番号</label>
                         <div class="input-with-buttons">
                             <input type="text" id="work-name" placeholder="図面番号を入力">
-                            <button type="button" id="btn-camera" title="カメラで読み取り"><span>📷</span></button>
-                            <button type="button" id="btn-image" title="画像から読み取り"><span>🖼️</span></button>
+                            <button type="button" id="btn-camera" title="カメラで読み取り"><span class="material-symbols-rounded">photo_camera</span></button>
+                            <button type="button" id="btn-image" title="画像から読み取り"><span class="material-symbols-rounded">image</span></button>
                             <input type="file" id="image-upload" accept="image/*" style="display: none;">
                         </div>
                         <div id="camera-container" style="display: none;">
                             <video id="camera-preview" autoplay playsinline style="width: 100%; border-radius: 4px;"></video>
                             <div class="camera-controls">
-                                <button type="button" id="btn-capture">撮影</button>
-                                <button type="button" id="btn-cancel-camera">キャンセル</button>
+                                <button type="button" id="btn-capture"><span class="material-symbols-rounded">photo_camera</span>撮影</button>
+                                <button type="button" id="btn-cancel-camera"><span class="material-symbols-rounded">close</span>キャンセル</button>
                             </div>
                         </div>
                         <canvas id="image-canvas" style="display: none;"></canvas>
@@ -217,15 +219,15 @@
         <!-- モバイル用のフッターナビゲーション -->
         <div class="mobile-nav">
             <div class="nav-item active" data-view="timer-view">
-                <span class="icon">⏱️</span>
+                <span class="material-symbols-rounded">timer</span>
                 <span class="label">測定</span>
             </div>
             <div class="nav-item" data-view="report-view">
-                <span class="icon">📊</span>
+                <span class="material-symbols-rounded">bar_chart</span>
                 <span class="label">レポート</span>
             </div>
             <div class="nav-item" data-view="settings-view">
-                <span class="icon">⚙️</span>
+                <span class="material-symbols-rounded">settings</span>
                 <span class="label">設定</span>
             </div>
         </div>
