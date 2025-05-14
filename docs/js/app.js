@@ -466,7 +466,7 @@ function exportData(allData = false) {
         return;
     }
     
-    let csvContent = '図面番号,備考,数量,時間,日付,詳細メモ\n';
+    let csvContent = '図面番号,作業内容,数量,時間,日付,詳細メモ\n';
     
     dataToExport.forEach(work => {
         csvContent += `"${csvEscape(work.name)}","${csvEscape(work.part)}","${work.quantity}","${work.time}","${formatDisplayDate(work.date)}","${csvEscape(work.notes)}"\n`;
