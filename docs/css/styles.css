@@ -795,22 +795,52 @@ button .material-symbols-rounded {
 /* ダークモード - テーブル */
 .dark-theme table {
     border-color: #555; /* 境界線を明るくして視認性アップ */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* テーブルに影を追加 */
 }
 
 .dark-theme table th {
-    background-color: #2a2a2a; /* ヘッダーの背景を暗く */
-    color: #ffffff; /* ヘッダーテキストは純白に */
+    background-color: #263238; /* ダークブルーグレイ - ヘッダー背景 */
+    color: #e3f2fd; /* 非常に明るい青 - ヘッダーテキスト */
     font-weight: 500; /* 少し太字に */
+    border-bottom: 2px solid #555; /* ヘッダー下の境界線を強調 */
+    text-transform: uppercase; /* 大文字表示 */
+    letter-spacing: 0.5px; /* 文字間隔を少し広く */
 }
 
 .dark-theme table td {
     border-color: #555;
-    color: #eeeeee; /* セルのテキストは少し明るく */
+    color: #f5f5f5; /* セルのテキストを白に近く */
+    border-bottom: 1px solid #444; /* セル間の区切り線 */
 }
 
 /* 行のホバー状態 */
 .dark-theme table tbody tr:hover {
-    background-color: rgba(33, 150, 243, 0.1); /* 青色の微かなハイライト */
+    background-color: rgba(33, 150, 243, 0.15); /* 青色のハイライトを強く */
+}
+
+/* 偶数行の背景色 */
+.dark-theme table tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.03); /* 非常に微かな白 - 縞模様効果 */
+}
+
+/* ダークモード - サイドバー */
+.dark-theme .sidebar {
+    background-color: #1a237e; /* インディゴ900 - 深い青紫色 */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.dark-theme .menu li {
+    color: #e8eaf6; /* インディゴ50 - 非常に明るい青紫色 */
+}
+
+.dark-theme .menu li:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-theme .menu li.active {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-weight: 500;
 }
 
 /* ダークモード - 各セクション */
@@ -821,6 +851,41 @@ button .material-symbols-rounded {
 .dark-theme .setting-item {
     background-color: #2a2a2a; /* 少し明るめに */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 影を強調 */
+}
+
+/* ダークモード - 見出しと重要テキスト */
+.dark-theme h2,
+.dark-theme h3,
+.dark-theme h4 {
+    color: #ffffff; /* 見出しは純白に */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* テキストに影を付けて浮き出させる */
+}
+
+/* ダークモード - タイマー表示 */
+.dark-theme .timer-display {
+    background-color: #1a1a1a; /* より暗い背景 */
+    border: 1px solid #444; /* 境界線を追加 */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05); /* 凹んだ感じに */
+}
+
+.dark-theme .time {
+    color: #4fc3f7; /* 明るい青色 - タイマー表示を目立たせる */
+    text-shadow: 0 0 5px rgba(79, 195, 247, 0.5); /* 青い光彩効果 */
+    font-weight: 500; /* やや太く */
+}
+
+.dark-theme .status {
+    color: #81c784; /* 明るい緑色 - ステータス表示 */
+}
+
+/* ダークモード - 「最近の作業」などのセクションタイトル */
+.dark-theme .recent-works h3,
+.dark-theme .report-data h3,
+.dark-theme .settings-section h3 {
+    color: #bbdefb; /* 明るい水色 */
+    border-bottom: 1px solid #444; /* 下線で区切り */
+    padding-bottom: 8px; /* 下線との間隔 */
+    margin-bottom: 16px; /* 下のコンテンツとの間隔 */
 }
 
 /* ダークモード - 入力フィールド */
@@ -900,6 +965,30 @@ button .material-symbols-rounded {
     background-color: #c62828; /* レッド800 */
 }
 
+/* ダークモード - ツールバー */
+.dark-theme .toolbar {
+    background-color: #1a1a1a; /* より暗い背景 */
+    border-bottom: 1px solid #444; /* 境界線を追加 */
+}
+
+.dark-theme .toolbar h2 {
+    color: #90caf9; /* 明るい青色 - タイトルを目立たせる */
+}
+
+/* ダークモード - サマリーカード値 */
+.dark-theme .summary-value {
+    color: #ffcc80; /* 明るいオレンジ - 数値を目立たせる */
+    font-weight: 500;
+}
+
+/* ダークモード - 重要な数値表示 */
+.dark-theme #total-time, 
+.dark-theme #total-works, 
+.dark-theme #avg-time {
+    color: #ffcc80; /* 明るいオレンジ - 統計数値 */
+    text-shadow: 0 0 3px rgba(255, 204, 128, 0.3); /* 微かな光彩 */
+}
+
 /* ダークモード - モバイルナビ */
 .dark-theme .mobile-nav {
     background-color: #1e1e1e; /* メイン背景に合わせる */
@@ -912,7 +1001,8 @@ button .material-symbols-rounded {
 }
 
 .dark-theme .nav-item.active {
-    color: var(--primary-color); /* アクティブは青色をそのまま */
+    color: #64b5f6; /* もっと明るい青色に変更 */
+    text-shadow: 0 0 5px rgba(33, 150, 243, 0.5); /* 光る効果 */
 }
 
 .dark-theme .nav-item:hover {
