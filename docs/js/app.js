@@ -509,19 +509,11 @@ function updateRecentWorksTable() {
         const work = workHistory[i];
         const row = document.createElement('tr');
         
-        // 開始時間の表示を設定
-        let startTimeStr = '-';
-        if (work.startDate) {
-            const startDate = new Date(work.startDate);
-            startTimeStr = formatTime(startDate);
-        }
-        
         row.innerHTML = `
             <td>${escapeHtml(work.name)}</td>
             <td>${escapeHtml(work.part)}</td>
             <td>${work.time}</td>
             <td>${formatDateWithDayOfWeek(new Date(work.date))}</td>
-            <td>${startTimeStr}</td>
             <td class="action-buttons">
                 <button class="btn-action btn-copy" data-index="${i}" title="この作業をコピー">
                     <span class="material-symbols-rounded">content_copy</span>
