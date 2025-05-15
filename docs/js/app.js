@@ -90,6 +90,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // APIキー管理ボタンのイベントリスナー
     initApiKeyManagement();
     
+    // 画像処理設定の初期化
+    initImageProcessingSettings();
+    
     // ヘルプボタンの設定
     initHelpButton();
     
@@ -763,6 +766,9 @@ function saveAppSettings() {
     // テーマ設定を保存
     appSettings.theme = themeSelect.value;
     
+    // 画像処理設定の保存
+    saveImageProcessingSettings();
+    
     // 設定を保存
     saveSettings();
     
@@ -770,6 +776,358 @@ function saveAppSettings() {
     applyTheme();
     
     alert('設定を保存しました。');
+}
+
+// 画像処理設定のUI要素
+const enablePreprocessingCheckbox = document.getElementById('enable-preprocessing');
+const contrastSlider = document.getElementById('contrast-slider');
+const contrastValue = document.getElementById('contrast-value');
+const brightnessSlider = document.getElementById('brightness-slider');
+const brightnessValue = document.getElementById('brightness-value');
+const grayscaleCheckbox = document.getElementById('grayscale-checkbox');
+const thresholdCheckbox = document.getElementById('threshold-checkbox');
+const thresholdSlider = document.getElementById('threshold-slider');
+const thresholdValue = document.getElementById('threshold-value');
+const sharpeningCheckbox = document.getElementById('sharpening-checkbox');
+const sharpeningSlider = document.getElementById('sharpening-slider');
+const sharpeningValue = document.getElementById('sharpening-value');
+const resetImageSettingsBtn = document.getElementById('reset-image-settings');
+const previewOriginal = document.getElementById('preview-original');
+const previewProcessed = document.getElementById('preview-processed');
+
+// プレビュー用のサンプル画像（デモ用）
+const sampleImageUrl = 'images/icons/app-logo.png';
+
+// 画像処理設定のイベントリスナーを設定
+function initImageProcessingSettings() {
+    if (!enablePreprocessingCheckbox) return; // 要素が存在しない場合は終了
+    
+    // 設定を読み込み
+    loadImageProcessingSettings();
+    
+    // 各スライダーの値表示と変更イベント
+    contrastSlider.addEventListener('input', () => {
+        contrastValue.textContent = contrastSlider.value;
+        updateImagePreview();
+    });
+    
+    brightnessSlider.addEventListener('input', () => {
+        brightnessValue.textContent = brightnessSlider.value;
+        updateImagePreview();
+    });
+    
+    // チェックボックスイベント
+    enablePreprocessingCheckbox.addEventListener('change', () => {
+        const imageSettingsDiv = document.getElementById('image-processing-settings');
+        imageSettingsDiv.style.opacity = enablePreprocessingCheckbox.checked ? '1' : '0.5';
+        imageSettingsDiv.style.pointerEvents = enablePreprocessingCheckbox.checked ? 'auto' : 'none';
+        
+        // ローカルストレージに保存
+        localStorage.setItem('enableImagePreprocessing', enablePreprocessingCheckbox.checked);
+        
+        updateImagePreview();
+    });
+    
+    grayscaleCheckbox.addEventListener('change', updateImagePreview);
+    
+    thresholdCheckbox.addEventListener('change', () => {
+        const subSetting = document.getElementById('threshold-sub-setting');
+        subSetting.style.display = thresholdCheckbox.checked ? 'flex' : 'none';
+        updateImagePreview();
+    });
+    
+    thresholdSlider.addEventListener('input', () => {
+        thresholdValue.textContent = thresholdSlider.value;
+        updateImagePreview();
+    });
+    
+    sharpeningCheckbox.addEventListener('change', () => {
+        const subSetting = document.getElementById('sharpening-sub-setting');
+        subSetting.style.display = sharpeningCheckbox.checked ? 'flex' : 'none';
+        updateImagePreview();
+    });
+    
+    sharpeningSlider.addEventListener('input', () => {
+        sharpeningValue.textContent = sharpeningSlider.value;
+        updateImagePreview();
+    });
+    
+    // 設定リセットボタン
+    resetImageSettingsBtn.addEventListener('click', resetImageProcessingSettings);
+    
+    // 初期表示
+    const enablePreprocessing = localStorage.getItem('enableImagePreprocessing') !== 'false';
+    enablePreprocessingCheckbox.checked = enablePreprocessing;
+    const imageSettingsDiv = document.getElementById('image-processing-settings');
+    imageSettingsDiv.style.opacity = enablePreprocessing ? '1' : '0.5';
+    imageSettingsDiv.style.pointerEvents = enablePreprocessing ? 'auto' : 'none';
+    
+    // サブ設定の表示状態を設定
+    document.getElementById('threshold-sub-setting').style.display = 
+        thresholdCheckbox.checked ? 'flex' : 'none';
+    document.getElementById('sharpening-sub-setting').style.display = 
+        sharpeningCheckbox.checked ? 'flex' : 'none';
+    
+    // サンプル画像を読み込み
+    loadSampleImage();
+}
+
+// 画像処理設定をロード
+function loadImageProcessingSettings() {
+    try {
+        const settings = getImageProcessingSettings();
+        
+        if (contrastSlider) contrastSlider.value = settings.contrast;
+        if (contrastValue) contrastValue.textContent = settings.contrast;
+        
+        if (brightnessSlider) brightnessSlider.value = settings.brightness;
+        if (brightnessValue) brightnessValue.textContent = settings.brightness;
+        
+        if (grayscaleCheckbox) grayscaleCheckbox.checked = settings.grayscale;
+        
+        if (thresholdCheckbox) thresholdCheckbox.checked = settings.threshold;
+        if (thresholdSlider) thresholdSlider.value = settings.thresholdValue;
+        if (thresholdValue) thresholdValue.textContent = settings.thresholdValue;
+        
+        if (sharpeningCheckbox) sharpeningCheckbox.checked = settings.sharpening;
+        if (sharpeningSlider) sharpeningSlider.value = settings.sharpeningLevel;
+        if (sharpeningValue) sharpeningValue.textContent = settings.sharpeningLevel;
+        
+        const enablePreprocessing = localStorage.getItem('enableImagePreprocessing') !== 'false';
+        if (enablePreprocessingCheckbox) {
+            enablePreprocessingCheckbox.checked = enablePreprocessing;
+        }
+        
+    } catch (error) {
+        console.error('画像処理設定の読み込みエラー:', error);
+    }
+}
+
+// 画像処理設定を保存
+function saveImageProcessingSettings() {
+    if (!enablePreprocessingCheckbox) return; // 要素が存在しない場合は終了
+    
+    try {
+        const settings = {
+            contrast: parseFloat(contrastSlider.value),
+            brightness: parseFloat(brightnessSlider.value),
+            grayscale: grayscaleCheckbox.checked,
+            threshold: thresholdCheckbox.checked,
+            thresholdValue: parseInt(thresholdSlider.value),
+            sharpening: sharpeningCheckbox.checked,
+            sharpeningLevel: parseFloat(sharpeningSlider.value),
+            denoise: true,  // 今回は固定値
+            denoiseLevel: 0.3
+        };
+        
+        localStorage.setItem('imageProcessingSettings', JSON.stringify(settings));
+        localStorage.setItem('enableImagePreprocessing', enablePreprocessingCheckbox.checked);
+        
+        console.log('画像処理設定を保存しました:', settings);
+    } catch (error) {
+        console.error('画像処理設定の保存エラー:', error);
+    }
+}
+
+// 画像処理設定を取得
+function getImageProcessingSettings() {
+    const defaultSettings = {
+        contrast: 1.3,        // コントラスト（1.0が通常）
+        brightness: 1.1,      // 明るさ（1.0が通常）
+        grayscale: false,     // グレースケール変換
+        threshold: false,     // 二値化処理
+        thresholdValue: 128,  // 二値化の閾値（0-255）
+        sharpening: true,     // シャープネス強調
+        sharpeningLevel: 0.5, // シャープネスレベル（0-1）
+        denoise: true,        // ノイズ除去
+        denoiseLevel: 0.3     // ノイズ除去レベル（0-1）
+    };
+    
+    try {
+        // ローカルストレージから設定を取得
+        const savedSettings = localStorage.getItem('imageProcessingSettings');
+        if (savedSettings) {
+            return { ...defaultSettings, ...JSON.parse(savedSettings) };
+        }
+    } catch (error) {
+        console.error('設定の読み込みエラー:', error);
+    }
+    
+    return defaultSettings;
+}
+
+// 画像処理設定をリセット
+function resetImageProcessingSettings() {
+    const defaultSettings = {
+        contrast: 1.3,
+        brightness: 1.1,
+        grayscale: false,
+        threshold: false,
+        thresholdValue: 128,
+        sharpening: true,
+        sharpeningLevel: 0.5,
+        denoise: true,
+        denoiseLevel: 0.3
+    };
+    
+    // UIを更新
+    contrastSlider.value = defaultSettings.contrast;
+    contrastValue.textContent = defaultSettings.contrast;
+    
+    brightnessSlider.value = defaultSettings.brightness;
+    brightnessValue.textContent = defaultSettings.brightness;
+    
+    grayscaleCheckbox.checked = defaultSettings.grayscale;
+    
+    thresholdCheckbox.checked = defaultSettings.threshold;
+    thresholdSlider.value = defaultSettings.thresholdValue;
+    thresholdValue.textContent = defaultSettings.thresholdValue;
+    
+    sharpeningCheckbox.checked = defaultSettings.sharpening;
+    sharpeningSlider.value = defaultSettings.sharpeningLevel;
+    sharpeningValue.textContent = defaultSettings.sharpeningLevel;
+    
+    // サブ設定の表示状態を更新
+    document.getElementById('threshold-sub-setting').style.display = 'none';
+    document.getElementById('sharpening-sub-setting').style.display = 'flex';
+    
+    // 設定を保存
+    localStorage.setItem('imageProcessingSettings', JSON.stringify(defaultSettings));
+    
+    // プレビューを更新
+    updateImagePreview();
+}
+
+// サンプル画像を読み込む
+function loadSampleImage() {
+    if (!previewOriginal || !previewProcessed) return;
+    
+    const img = new Image();
+    img.onload = () => {
+        previewOriginal.src = img.src;
+        updateImagePreview();
+    };
+    img.onerror = (error) => {
+        console.error('サンプル画像の読み込みエラー:', error);
+    };
+    img.src = sampleImageUrl;
+}
+
+// 画像プレビューを更新
+function updateImagePreview() {
+    if (!previewOriginal || !previewProcessed) return;
+    
+    // 元画像がまだ読み込まれていない場合
+    if (!previewOriginal.complete) {
+        setTimeout(updateImagePreview, 100);
+        return;
+    }
+    
+    try {
+        // 前処理が無効な場合は元の画像をそのまま表示
+        if (enablePreprocessingCheckbox && !enablePreprocessingCheckbox.checked) {
+            previewProcessed.src = previewOriginal.src;
+            return;
+        }
+        
+        // 元画像をキャンバスに描画
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 元画像のサイズを取得
+        const width = previewOriginal.naturalWidth;
+        const height = previewOriginal.naturalHeight;
+        
+        // キャンバスのサイズを設定
+        canvas.width = width;
+        canvas.height = height;
+        
+        // 元画像を描画
+        ctx.drawImage(previewOriginal, 0, 0, width, height);
+        
+        // 現在の設定を取得
+        const settings = {
+            contrast: parseFloat(contrastSlider.value),
+            brightness: parseFloat(brightnessSlider.value),
+            grayscale: grayscaleCheckbox.checked,
+            threshold: thresholdCheckbox.checked,
+            thresholdValue: parseInt(thresholdSlider.value),
+            sharpening: sharpeningCheckbox.checked,
+            sharpeningLevel: parseFloat(sharpeningSlider.value)
+        };
+        
+        // 画像処理を適用
+        applyImageProcessing(ctx, width, height, settings);
+        
+        // 処理結果を表示
+        previewProcessed.src = canvas.toDataURL('image/jpeg');
+        
+    } catch (error) {
+        console.error('プレビュー更新エラー:', error);
+    }
+}
+
+// 画像処理を適用 (vision-api.jsと同じ関数)
+function applyImageProcessing(ctx, width, height, settings) {
+    // 画像データを取得
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    // グレースケール変換
+    if (settings.grayscale) {
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = data[i + 1] = data[i + 2] = avg;
+        }
+    }
+    
+    // コントラスト調整
+    if (settings.contrast !== 1.0) {
+        const factor = (259 * (settings.contrast * 100 + 255)) / (255 * (259 - settings.contrast * 100));
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = factor * (data[i] - 128) + 128;           // R
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;   // G
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;   // B
+        }
+    }
+    
+    // 明るさ調整
+    if (settings.brightness !== 1.0) {
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] *= settings.brightness;        // R
+            data[i + 1] *= settings.brightness;    // G
+            data[i + 2] *= settings.brightness;    // B
+        }
+    }
+    
+    // 閾値処理（二値化）
+    if (settings.threshold) {
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            const val = avg > settings.thresholdValue ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = val;
+        }
+    }
+    
+    // 変更を適用
+    ctx.putImageData(imageData, 0, 0);
+    
+    // シャープネス（簡易版）
+    if (settings.sharpening) {
+        // 別のキャンバスを使用してシャープネスを適用（プレビュー用の簡易版）
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        
+        // 元の画像をコピー
+        tempCtx.drawImage(ctx.canvas, 0, 0);
+        
+        ctx.filter = `contrast(120%) saturate(110%)`;
+        ctx.drawImage(tempCanvas, 0, 0);
+        
+        ctx.filter = 'none';
+    }
 }
 
 // イベントリスナー

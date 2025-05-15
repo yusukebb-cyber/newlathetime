@@ -87,17 +87,192 @@ function toggleApiKeyVisibility() {
     }
 }
 
-// 画像をBase64にエンコード
+// 画像の前処理を適用してからBase64にエンコード
 function imageToBase64(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (e) => {
-            const base64 = e.target.result.split(',')[1];
-            resolve(base64);
+            // 元のBase64データ
+            const originalBase64 = e.target.result;
+            
+            // 画像前処理のフラグ（設定で無効化できるようにする）
+            const enablePreprocessing = localStorage.getItem('enableImagePreprocessing') !== 'false';
+            
+            if (enablePreprocessing) {
+                // 画像をロードして前処理を適用
+                preprocessImage(originalBase64)
+                    .then(processedBase64 => {
+                        // 前処理後のBase64文字列からヘッダを除去
+                        const base64 = processedBase64.split(',')[1];
+                        resolve(base64);
+                    })
+                    .catch(error => {
+                        console.error('画像前処理エラー:', error);
+                        // 前処理に失敗した場合は元の画像を使用
+                        const base64 = originalBase64.split(',')[1];
+                        resolve(base64);
+                    });
+            } else {
+                // 前処理を適用せず、そのまま返す
+                const base64 = originalBase64.split(',')[1];
+                resolve(base64);
+            }
         };
         reader.onerror = (error) => reject(error);
         reader.readAsDataURL(file);
     });
+}
+
+// 画像の前処理を適用
+function preprocessImage(base64Image) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            try {
+                // キャンバスを作成
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // 画像の最大サイズを設定（Vision APIの推奨サイズ）
+                const maxSize = 1600;
+                let width = img.width;
+                let height = img.height;
+                
+                // 画像のサイズを調整（大きすぎる場合）
+                if (width > maxSize || height > maxSize) {
+                    if (width > height) {
+                        height = Math.floor(height * (maxSize / width));
+                        width = maxSize;
+                    } else {
+                        width = Math.floor(width * (maxSize / height));
+                        height = maxSize;
+                    }
+                }
+                
+                // キャンバスのサイズを設定
+                canvas.width = width;
+                canvas.height = height;
+                
+                // 画像処理の設定を取得（ローカルストレージに保存）
+                const settings = getImageProcessingSettings();
+                
+                // 元の画像を描画
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // 画像処理を適用
+                applyImageProcessing(ctx, width, height, settings);
+                
+                // 処理済み画像をBase64に変換
+                const processedBase64 = canvas.toDataURL('image/jpeg', 0.9);
+                resolve(processedBase64);
+            } catch (error) {
+                console.error('画像処理エラー:', error);
+                reject(error);
+            }
+        };
+        img.onerror = reject;
+        img.src = base64Image;
+    });
+}
+
+// 画像処理設定を取得
+function getImageProcessingSettings() {
+    const defaultSettings = {
+        contrast: 1.3,        // コントラスト（1.0が通常）
+        brightness: 1.1,      // 明るさ（1.0が通常）
+        grayscale: false,     // グレースケール変換
+        threshold: false,     // 二値化処理
+        thresholdValue: 128,  // 二値化の閾値（0-255）
+        sharpening: true,     // シャープネス強調
+        sharpeningLevel: 0.5, // シャープネスレベル（0-1）
+        denoise: true,        // ノイズ除去
+        denoiseLevel: 0.3     // ノイズ除去レベル（0-1）
+    };
+    
+    try {
+        // ローカルストレージから設定を取得
+        const savedSettings = localStorage.getItem('imageProcessingSettings');
+        if (savedSettings) {
+            return { ...defaultSettings, ...JSON.parse(savedSettings) };
+        }
+    } catch (error) {
+        console.error('設定の読み込みエラー:', error);
+    }
+    
+    return defaultSettings;
+}
+
+// 画像処理を適用
+function applyImageProcessing(ctx, width, height, settings) {
+    // 画像データを取得
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    
+    // 図面やテキスト認識に適した処理を適用
+    
+    // グレースケール変換（テキスト認識向け）
+    if (settings.grayscale) {
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = data[i + 1] = data[i + 2] = avg;
+        }
+    }
+    
+    // コントラスト調整
+    if (settings.contrast !== 1.0) {
+        const factor = (259 * (settings.contrast * 100 + 255)) / (255 * (259 - settings.contrast * 100));
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = factor * (data[i] - 128) + 128;           // R
+            data[i + 1] = factor * (data[i + 1] - 128) + 128;   // G
+            data[i + 2] = factor * (data[i + 2] - 128) + 128;   // B
+        }
+    }
+    
+    // 明るさ調整
+    if (settings.brightness !== 1.0) {
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] *= settings.brightness;        // R
+            data[i + 1] *= settings.brightness;    // G
+            data[i + 2] *= settings.brightness;    // B
+        }
+    }
+    
+    // 閾値処理（二値化）- テキスト認識に特に有効
+    if (settings.threshold) {
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            const val = avg > settings.thresholdValue ? 255 : 0;
+            data[i] = data[i + 1] = data[i + 2] = val;
+        }
+    }
+    
+    // 変更を適用
+    ctx.putImageData(imageData, 0, 0);
+    
+    // シャープネス（簡易版）- テキスト認識の精度向上に有効
+    if (settings.sharpening) {
+        // 別のキャンバスを使用してシャープネスを適用
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        
+        // 元の画像をコピー
+        tempCtx.drawImage(ctx.canvas, 0, 0);
+        
+        // アンシャープマスク（簡易版）
+        ctx.filter = `blur(1px)`;
+        ctx.drawImage(tempCanvas, 0, 0);
+        
+        ctx.filter = 'none';
+        ctx.globalCompositeOperation = 'difference';
+        ctx.drawImage(tempCanvas, 0, 0);
+        
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.globalAlpha = settings.sharpeningLevel;
+        ctx.drawImage(tempCanvas, 0, 0);
+        ctx.globalAlpha = 1.0;
+    }
 }
 
 // Vision APIを呼び出してテキスト検出
