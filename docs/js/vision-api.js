@@ -175,92 +175,113 @@ async function extractDrawingNumberFromImage(imageFile) {
 
 // テキスト選択用モーダルを表示
 function showTextSelectionModal(textLines) {
-    // モーダル要素を取得
-    const textModal = document.getElementById('text-selection-modal');
-    const textList = document.getElementById('detected-text-list');
-    const selectedTextPreview = document.getElementById('selected-text-preview');
-    const clearSelectionBtn = document.getElementById('clear-selection');
-    const confirmSelectionBtn = document.getElementById('confirm-selection');
-    
-    // 選択されたテキストを保存する配列
-    const selectedTexts = [];
-    
-    // 選択されたテキストのプレビューを更新
-    const updatePreview = () => {
-        if (selectedTexts.length === 0) {
-            selectedTextPreview.textContent = '選択されたテキスト: ';
-        } else {
-            selectedTextPreview.textContent = '選択されたテキスト: ' + selectedTexts.join(' ');
-        }
-    };
-    
-    // リストをクリア
-    textList.innerHTML = '';
-    
-    // 検出されたテキスト行をリストに追加
-    textLines.forEach((line, index) => {
-        if (line.trim() === '') return;
+    // iOSのサファリ対策として、少し遅延を入れる
+    setTimeout(() => {
+        // モーダル要素を取得
+        const textModal = document.getElementById('text-selection-modal');
+        const textList = document.getElementById('detected-text-list');
+        const selectedTextPreview = document.getElementById('selected-text-preview');
+        const clearSelectionBtn = document.getElementById('clear-selection');
+        const confirmSelectionBtn = document.getElementById('confirm-selection');
         
-        const listItem = document.createElement('li');
-        listItem.textContent = line;
-        listItem.addEventListener('click', () => {
-            // すでに選択済みの場合、選択解除
-            if (listItem.classList.contains('selected')) {
-                listItem.classList.remove('selected');
-                const index = selectedTexts.indexOf(line);
-                if (index > -1) {
-                    selectedTexts.splice(index, 1);
+        // 選択されたテキストを保存する配列
+        const selectedTexts = [];
+        
+        // 選択されたテキストのプレビューを更新
+        const updatePreview = () => {
+            if (selectedTexts.length === 0) {
+                selectedTextPreview.textContent = '選択されたテキスト: ';
+            } else {
+                selectedTextPreview.textContent = '選択されたテキスト: ' + selectedTexts.join(' ');
+            }
+        };
+        
+        // リストをクリア
+        textList.innerHTML = '';
+        
+        // 検出されたテキスト行をリストに追加
+        textLines.forEach((line, index) => {
+            if (line.trim() === '') return;
+            
+            const listItem = document.createElement('li');
+            listItem.textContent = line;
+            listItem.addEventListener('click', () => {
+                // すでに選択済みの場合、選択解除
+                if (listItem.classList.contains('selected')) {
+                    listItem.classList.remove('selected');
+                    const index = selectedTexts.indexOf(line);
+                    if (index > -1) {
+                        selectedTexts.splice(index, 1);
+                    }
+                } 
+                // 選択されていない場合、選択（最大2つまで）
+                else if (selectedTexts.length < 2) {
+                    listItem.classList.add('selected');
+                    selectedTexts.push(line);
                 }
-            } 
-            // 選択されていない場合、選択（最大2つまで）
-            else if (selectedTexts.length < 2) {
-                listItem.classList.add('selected');
-                selectedTexts.push(line);
+                
+                // プレビューを更新
+                updatePreview();
+            });
+            
+            textList.appendChild(listItem);
+        });
+        
+        // イベントリスナーを追加する前に一度削除（重複防止）
+        if (clearSelectionBtn._hasClickListener) {
+            clearSelectionBtn.removeEventListener('click', clearSelectionBtn._clickHandler);
+        }
+        if (confirmSelectionBtn._hasClickListener) {
+            confirmSelectionBtn.removeEventListener('click', confirmSelectionBtn._clickHandler);
+        }
+        
+        // 選択クリアボタンのイベント
+        clearSelectionBtn._clickHandler = () => {
+            selectedTexts.length = 0;
+            updatePreview();
+            
+            // 選択状態をクリア
+            document.querySelectorAll('.text-selection-list li.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+        };
+        clearSelectionBtn._hasClickListener = true;
+        clearSelectionBtn.addEventListener('click', clearSelectionBtn._clickHandler);
+        
+        // 確定ボタンのイベント
+        confirmSelectionBtn._clickHandler = () => {
+            // 選択されたテキストを半角スペースで結合
+            const combinedText = selectedTexts.join(' ');
+            
+            // コールバック関数を呼び出し
+            if (window.resolveDrawingNumber) {
+                window.resolveDrawingNumber(combinedText || null);
             }
             
-            // プレビューを更新
-            updatePreview();
-        });
+            // モーダルを閉じる
+            textModal.style.display = 'none';
+        };
+        confirmSelectionBtn._hasClickListener = true;
+        confirmSelectionBtn.addEventListener('click', confirmSelectionBtn._clickHandler);
         
-        textList.appendChild(listItem);
-    });
-    
-    // 選択クリアボタンのイベント
-    clearSelectionBtn.addEventListener('click', () => {
-        selectedTexts.length = 0;
+        // モーダルを表示
+        textModal.style.display = 'flex';
+        
+        // 初期表示
         updatePreview();
         
-        // 選択状態をクリア
-        document.querySelectorAll('.text-selection-list li.selected').forEach(item => {
-            item.classList.remove('selected');
-        });
-    });
-    
-    // 確定ボタンのイベント
-    confirmSelectionBtn.addEventListener('click', () => {
-        // 選択されたテキストを半角スペースで結合
-        const combinedText = selectedTexts.join(' ');
-        
-        // コールバック関数を呼び出し
-        if (window.resolveDrawingNumber) {
-            window.resolveDrawingNumber(combinedText || null);
-        }
-        
-        // モーダルを閉じる
-        textModal.style.display = 'none';
-    });
-    
-    // モーダルを表示
-    textModal.style.display = 'flex';
-    
-    // 初期表示
-    updatePreview();
+        // iOS Safariでモーダルを見えやすくするために、bodyのスクロールを無効化
+        document.body.style.overflow = 'hidden';
+    }, 300); // 300msの遅延
 }
 
 // テキスト選択モーダルを閉じる
 function closeTextModal() {
     const textModal = document.getElementById('text-selection-modal');
     textModal.style.display = 'none';
+    
+    // bodyのスクロールを再度有効化
+    document.body.style.overflow = '';
     
     // 選択がキャンセルされた場合
     if (window.resolveDrawingNumber) {

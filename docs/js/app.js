@@ -934,14 +934,21 @@ if (imageBtn) {
         if (!file) return;
         
         try {
-            // 図面番号を抽出
-            const drawingNumber = await processUploadedImage(file);
-            
-            // nullの場合（キャンセルされた場合）は何もしない
-            if (drawingNumber) {
-                // 図面番号を入力欄に設定
-                workNameInput.value = drawingNumber;
-            }
+            // 少し遅延を入れる（iOSのサファリ対策）
+            setTimeout(async () => {
+                try {
+                    // 図面番号を抽出
+                    const drawingNumber = await processUploadedImage(file);
+                    
+                    // nullの場合（キャンセルされた場合）は何もしない
+                    if (drawingNumber) {
+                        // 図面番号を入力欄に設定
+                        workNameInput.value = drawingNumber;
+                    }
+                } catch (error) {
+                    alert(`画像処理エラー: ${error.message}`);
+                }
+            }, 100);
         } catch (error) {
             alert(`画像処理エラー: ${error.message}`);
         }
