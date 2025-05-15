@@ -509,11 +509,19 @@ function updateRecentWorksTable() {
         const work = workHistory[i];
         const row = document.createElement('tr');
         
+        // 開始時間の表示を設定
+        let startTimeStr = '-';
+        if (work.startDate) {
+            const startDate = new Date(work.startDate);
+            startTimeStr = formatTime(startDate);
+        }
+        
         row.innerHTML = `
             <td>${escapeHtml(work.name)}</td>
             <td>${escapeHtml(work.part)}</td>
             <td>${work.time}</td>
-            <td>${formatDisplayDate(work.date)}</td>
+            <td>${formatDateWithDayOfWeek(new Date(work.date))}</td>
+            <td>${startTimeStr}</td>
             <td class="action-buttons">
                 <button class="btn-action btn-copy" data-index="${i}" title="この作業をコピー">
                     <span class="material-symbols-rounded">content_copy</span>
@@ -573,6 +581,38 @@ function formatDisplayDate(dateStr) {
     return date.toLocaleDateString();
 }
 
+// 曜日付きの日付フォーマット
+function formatDateWithDayOfWeek(date) {
+    if (!(date instanceof Date) || isNaN(date)) {
+        return '日付なし';
+    }
+    
+    // 曜日の配列
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+    const dayOfWeek = dayNames[date.getDay()];
+    
+    // YYYY/MM/DD形式に変換して曜日を追加
+    const year = date.getFullYear();
+    // 月と日は1桁の場合に0埋め
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}/${month}/${day} (${dayOfWeek})`;
+}
+
+// 時刻フォーマット (HH:MM形式)
+function formatTime(date) {
+    if (!(date instanceof Date) || isNaN(date)) {
+        return '時刻なし';
+    }
+    
+    // 時と分を取得して0埋め
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${hours}:${minutes}`;
+}
+
 // レポートデータ更新
 function updateReportData() {
     const fromDate = dateFromInput.value;
@@ -595,12 +635,31 @@ function updateReportData() {
     filteredData.forEach(work => {
         const row = document.createElement('tr');
         
+        // 開始日時の処理
+        let startDateStr = '記録なし';
+        let startTimeStr = '-';
+        let startDayOfWeek = '';
+        
+        if (work.startDate) {
+            const startDateTime = new Date(work.startDate);
+            startDateStr = formatDateWithDayOfWeek(startDateTime);
+            startTimeStr = formatTime(startDateTime);
+        }
+        
+        // 終了日時の処理
+        const endDate = work.timestamp ? new Date(work.timestamp) : new Date(work.date);
+        const endDateStr = formatDateWithDayOfWeek(endDate);
+        const endTimeStr = formatTime(endDate);
+        
         row.innerHTML = `
             <td>${escapeHtml(work.name)}</td>
             <td>${escapeHtml(work.part)}</td>
             <td>${work.quantity}</td>
             <td>${work.time}</td>
-            <td>${formatDisplayDate(work.date)}</td>
+            <td>${startDateStr}</td>
+            <td>${startTimeStr}</td>
+            <td>${endDateStr}</td>
+            <td>${endTimeStr}</td>
             <td>${escapeHtml(work.notes)}</td>
         `;
         
