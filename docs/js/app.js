@@ -497,8 +497,16 @@ function updateRecentWorksTable() {
             <td>${escapeHtml(work.part)}</td>
             <td>${work.time}</td>
             <td>${formatDisplayDate(work.date)}</td>
-            <td>
-                <button class="btn-copy" data-index="${i}">コピー</button>
+            <td class="action-buttons">
+                <button class="btn-action btn-copy" data-index="${i}" title="この作業をコピー">
+                    <span class="material-symbols-rounded">content_copy</span>
+                </button>
+                <button class="btn-action btn-edit" data-index="${i}" title="この作業を編集">
+                    <span class="material-symbols-rounded">edit</span>
+                </button>
+                <button class="btn-action btn-delete" data-index="${i}" title="この作業を削除">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
             </td>
         `;
         
@@ -508,8 +516,24 @@ function updateRecentWorksTable() {
     // コピーボタンイベント追加
     document.querySelectorAll('.btn-copy').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const index = e.target.getAttribute('data-index');
+            const index = e.target.closest('.btn-copy').getAttribute('data-index');
             copyWorkData(index);
+        });
+    });
+    
+    // 編集ボタンイベント追加
+    document.querySelectorAll('.btn-edit').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = e.target.closest('.btn-edit').getAttribute('data-index');
+            showEditWorkModal(index);
+        });
+    });
+    
+    // 削除ボタンイベント追加
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = e.target.closest('.btn-delete').getAttribute('data-index');
+            confirmDeleteWork(index);
         });
     });
 }
@@ -1130,6 +1154,170 @@ function applyImageProcessing(ctx, width, height, settings) {
     }
 }
 
+// 作業編集モーダルを表示
+function showEditWorkModal(index) {
+    const work = workHistory[index];
+    if (!work) return;
+    
+    // モーダル要素を取得
+    const modal = document.getElementById('edit-work-modal');
+    const editWorkIndex = document.getElementById('edit-work-index');
+    const editWorkName = document.getElementById('edit-work-name');
+    const editWorkPart = document.getElementById('edit-work-part');
+    const editWorkQuantity = document.getElementById('edit-work-quantity');
+    const editWorkDate = document.getElementById('edit-work-date');
+    const editWorkTime = document.getElementById('edit-work-time');
+    const editWorkNotes = document.getElementById('edit-work-notes');
+    
+    // フォームに現在の値を設定
+    editWorkIndex.value = index;
+    editWorkName.value = work.name;
+    editWorkPart.value = work.part;
+    editWorkQuantity.value = work.quantity;
+    editWorkDate.value = work.date;
+    editWorkTime.value = work.time;
+    editWorkNotes.value = work.notes || '';
+    
+    // モーダルを表示
+    modal.style.display = 'flex';
+    
+    // 保存ボタンのイベントリスナーを設定
+    const saveButton = document.getElementById('save-edit-work');
+    
+    // 既存のイベントリスナーを削除（重複を防ぐため）
+    if (saveButton._clickListener) {
+        saveButton.removeEventListener('click', saveButton._clickListener);
+    }
+    
+    // 新しいイベントリスナーを設定
+    saveButton._clickListener = () => saveEditWork();
+    saveButton.addEventListener('click', saveButton._clickListener);
+}
+
+// 編集した作業データを保存
+function saveEditWork() {
+    const index = parseInt(document.getElementById('edit-work-index').value);
+    const work = workHistory[index];
+    
+    if (!work) return;
+    
+    // 変更前の作業内容を保持（時間計算のため）
+    const originalTimeRaw = work.timeRaw;
+    
+    // フォームから値を取得
+    const name = document.getElementById('edit-work-name').value || '番号なし';
+    const part = document.getElementById('edit-work-part').value || '-';
+    const quantity = parseInt(document.getElementById('edit-work-quantity').value) || 1;
+    const date = document.getElementById('edit-work-date').value;
+    const time = document.getElementById('edit-work-time').value;
+    const notes = document.getElementById('edit-work-notes').value;
+    
+    // 時間の妥当性チェック
+    const timePattern = /^([0-9]{2}):([0-9]{2}):([0-9]{2})$/;
+    if (!timePattern.test(time)) {
+        alert('時間形式が正しくありません。HH:MM:SS形式で入力してください。');
+        return;
+    }
+    
+    // HH:MM:SSをミリ秒に変換
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    const timeRaw = (hours * 60 * 60 + minutes * 60 + seconds) * 1000;
+    
+    // 作業データを更新
+    work.name = name;
+    work.part = part;
+    work.quantity = quantity;
+    work.date = date;
+    work.time = time;
+    work.timeRaw = timeRaw;
+    work.notes = notes;
+    
+    // ローカルストレージに保存
+    saveToLocalStorage();
+    
+    // テーブルを更新
+    updateRecentWorksTable();
+    
+    // モーダルを閉じる
+    closeEditWorkModal();
+    
+    // 変更完了メッセージ
+    alert('作業データを更新しました。');
+}
+
+// 編集モーダルを閉じる
+function closeEditWorkModal() {
+    const modal = document.getElementById('edit-work-modal');
+    modal.style.display = 'none';
+}
+
+// 削除確認モーダルを表示
+function confirmDeleteWork(index) {
+    const work = workHistory[index];
+    if (!work) return;
+    
+    // モーダル要素を取得
+    const modal = document.getElementById('delete-confirm-modal');
+    const deleteWorkIndex = document.getElementById('delete-work-index');
+    const deleteWorkName = document.getElementById('delete-work-name');
+    const deleteWorkPart = document.getElementById('delete-work-part');
+    const deleteWorkTime = document.getElementById('delete-work-time');
+    const deleteWorkDate = document.getElementById('delete-work-date');
+    
+    // フォームに現在の値を設定
+    deleteWorkIndex.value = index;
+    deleteWorkName.textContent = work.name;
+    deleteWorkPart.textContent = work.part;
+    deleteWorkTime.textContent = work.time;
+    deleteWorkDate.textContent = formatDisplayDate(work.date);
+    
+    // モーダルを表示
+    modal.style.display = 'flex';
+    
+    // 削除ボタンのイベントリスナーを設定
+    const deleteButton = document.getElementById('confirm-delete-work');
+    
+    // 既存のイベントリスナーを削除（重複を防ぐため）
+    if (deleteButton._clickListener) {
+        deleteButton.removeEventListener('click', deleteButton._clickListener);
+    }
+    
+    // 新しいイベントリスナーを設定
+    deleteButton._clickListener = () => deleteWork(index);
+    deleteButton.addEventListener('click', deleteButton._clickListener);
+}
+
+// 削除確認モーダルを閉じる
+function closeDeleteConfirmModal() {
+    const modal = document.getElementById('delete-confirm-modal');
+    modal.style.display = 'none';
+}
+
+// 作業データを削除
+function deleteWork(index) {
+    if (index < 0 || index >= workHistory.length) return;
+    
+    // 配列から削除
+    workHistory.splice(index, 1);
+    
+    // ローカルストレージに保存
+    saveToLocalStorage();
+    
+    // テーブルを更新
+    updateRecentWorksTable();
+    
+    // レポートビューが表示されている場合は更新
+    if (document.getElementById('report-view').classList.contains('active')) {
+        updateReportData();
+    }
+    
+    // モーダルを閉じる
+    closeDeleteConfirmModal();
+    
+    // 削除完了メッセージ
+    alert('作業データを削除しました。');
+}
+
 // イベントリスナー
 startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
@@ -1143,6 +1331,9 @@ restoreBtn.addEventListener('click', setupRestoreData);
 restoreFileInput.addEventListener('change', restoreFromFile);
 clearDataBtn.addEventListener('click', clearAllData);
 saveSettingsBtn.addEventListener('click', saveAppSettings);
+
+// 画面読み込み時にDOMContentLoadedイベントで初期化する関数の中で実行される
+// このコードはapp.jsの最後に追加すること
 
 // システムのダークモード検出
 if (window.matchMedia) {

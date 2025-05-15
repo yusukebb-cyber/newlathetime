@@ -521,6 +521,65 @@ table tr:last-child td {
     border-bottom: none;
 }
 
+/* アクションボタン */
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    min-width: 120px;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.btn-action:active {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.btn-action .material-symbols-rounded {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.btn-action.btn-copy {
+    color: var(--primary-color);
+}
+
+.btn-action.btn-edit {
+    color: var(--warning-color);
+}
+
+.btn-action.btn-delete {
+    color: var(--danger-color);
+}
+
+/* ダークモード - アクションボタン */
+.dark-theme .btn-action:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-theme .btn-action:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
 /* レポート関連スタイル */
 .report-filters {
     display: grid;
@@ -1080,6 +1139,37 @@ button .material-symbols-rounded {
 
 .btn-secondary:hover {
     background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 100%), #607D8B;
+}
+
+.btn-danger {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 100%), var(--danger-color);
+    box-shadow: 
+        inset 0 1px 0 rgba(255,100,100,0.3), 
+        inset 0 -1px 1px rgba(100,0,0,0.2),
+        0 2px 4px rgba(0,0,0,0.2);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(0,0,0,0.1) 100%), #D32F2F;
+    box-shadow: 
+        inset 0 1px 0 rgba(255,100,100,0.4), 
+        inset 0 -1px 1px rgba(100,0,0,0.2),
+        0 4px 8px rgba(100,0,0,0.3);
+}
+
+.delete-work-info {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: var(--radius-small);
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.delete-work-info p {
+    margin: 5px 0;
+}
+
+.dark-theme .delete-work-info {
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 /* ダークモード - API設定 */

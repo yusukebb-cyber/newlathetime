@@ -495,6 +495,73 @@
         </div>
     </div>
 
+    <!-- 作業編集モーダル -->
+    <div id="edit-work-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>作業データを編集</h3>
+                <button class="modal-close" onclick="closeEditWorkModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-work-form">
+                    <input type="hidden" id="edit-work-index">
+                    <div class="form-group">
+                        <label for="edit-work-name">図面番号</label>
+                        <input type="text" id="edit-work-name" placeholder="図面番号を入力">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-work-part">作業内容</label>
+                        <input type="text" id="edit-work-part" placeholder="作業内容を入力">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-work-quantity">数量</label>
+                        <input type="number" id="edit-work-quantity" min="1" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-work-date">日付</label>
+                        <input type="date" id="edit-work-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-work-time">時間（HH:MM:SS）</label>
+                        <input type="text" id="edit-work-time" placeholder="00:00:00" pattern="[0-9]{2}:[0-9]{2}:[0-9]{2}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-work-notes">詳細メモ</label>
+                        <textarea id="edit-work-notes" placeholder="詳細メモを入力（任意）"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeEditWorkModal()">キャンセル</button>
+                <button class="btn-primary" id="save-edit-work">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>作業データの削除</h3>
+                <button class="modal-close" onclick="closeDeleteConfirmModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p>以下の作業データを削除しますか？この操作は元に戻せません。</p>
+                <div class="delete-work-info">
+                    <p><strong>図面番号:</strong> <span id="delete-work-name"></span></p>
+                    <p><strong>作業内容:</strong> <span id="delete-work-part"></span></p>
+                    <p><strong>時間:</strong> <span id="delete-work-time"></span></p>
+                    <p><strong>日付:</strong> <span id="delete-work-date"></span></p>
+                </div>
+                <input type="hidden" id="delete-work-index">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeDeleteConfirmModal()">キャンセル</button>
+                <button class="btn-danger" id="confirm-delete-work">削除</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/vision-api.js"></script>
     <script src="js/app.js"></script>
 </body>
