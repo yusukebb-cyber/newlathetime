@@ -509,11 +509,14 @@ function updateRecentWorksTable() {
         const work = workHistory[i];
         const row = document.createElement('tr');
         
+        // 終了日を取得 (timestamp があればそれを使用)
+        const endDate = work.timestamp ? new Date(work.timestamp) : new Date(work.date);
+
         row.innerHTML = `
             <td>${escapeHtml(work.name)}</td>
             <td>${escapeHtml(work.part)}</td>
             <td>${work.time}</td>
-            <td>${formatDateWithDayOfWeek(new Date(work.date))}</td>
+            <td>${formatDateWithDayOfWeek(endDate)}</td>
             <td class="action-buttons">
                 <button class="btn-action btn-copy" data-index="${i}" title="この作業をコピー">
                     <span class="material-symbols-rounded">content_copy</span>
