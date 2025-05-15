@@ -933,12 +933,50 @@ if (imageBtn) {
         const file = e.target.files[0];
         if (!file) return;
         
+        console.log('画像が選択されました: ' + file.name + ', サイズ: ' + file.size + 'バイト, タイプ: ' + file.type);
+        console.log('画像ソース: ' + (file.name.includes('image') ? 'カメラ撮影の可能性' : 'ファイル選択の可能性'));
+        
         try {
-            // 少し遅延を入れる（iOSのサファリ対策）
+            // ファイル情報からカメラで撮影されたかどうかを推測
+            const isLikelyCameraCapture = file.type === 'image/jpeg' && 
+                                         (file.name.startsWith('image') || file.name.includes('IMG_')) && 
+                                         new Date().getTime() - file.lastModified < 60000; // 1分以内に作成された
+            
+            // カメラ撮影と思われる場合は長めの遅延を設定
+            const delayTime = isLikelyCameraCapture ? 500 : 100;
+            console.log(`処理遅延: ${delayTime}ms (カメラ撮影と推測: ${isLikelyCameraCapture})`);
+            
+            // ローディングインジケータを表示
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                const loadingEl = document.createElement('div');
+                loadingEl.className = 'loading-indicator';
+                loadingEl.innerHTML = '画像を処理中...';
+                mainContent.appendChild(loadingEl);
+                
+                // スタイルを適用
+                loadingEl.style.position = 'fixed';
+                loadingEl.style.top = '50%';
+                loadingEl.style.left = '50%';
+                loadingEl.style.transform = 'translate(-50%, -50%)';
+                loadingEl.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                loadingEl.style.color = 'white';
+                loadingEl.style.padding = '15px 20px';
+                loadingEl.style.borderRadius = '5px';
+                loadingEl.style.zIndex = '5000';
+            }
+            
+            // 少し遅延を入れる（iOSのサファリ対策 - カメラ撮影は特に長めに）
             setTimeout(async () => {
                 try {
                     // 図面番号を抽出
                     const drawingNumber = await processUploadedImage(file);
+                    
+                    // ローディングインジケータを削除
+                    const loadingEl = document.querySelector('.loading-indicator');
+                    if (loadingEl) {
+                        loadingEl.parentNode.removeChild(loadingEl);
+                    }
                     
                     // nullの場合（キャンセルされた場合）は何もしない
                     if (drawingNumber) {
@@ -946,10 +984,18 @@ if (imageBtn) {
                         workNameInput.value = drawingNumber;
                     }
                 } catch (error) {
+                    // ローディングインジケータを削除
+                    const loadingEl = document.querySelector('.loading-indicator');
+                    if (loadingEl) {
+                        loadingEl.parentNode.removeChild(loadingEl);
+                    }
+                    
+                    console.error('画像処理エラー:', error);
                     alert(`画像処理エラー: ${error.message}`);
                 }
-            }, 100);
+            }, delayTime);
         } catch (error) {
+            console.error('画像処理エラー:', error);
             alert(`画像処理エラー: ${error.message}`);
         }
         
