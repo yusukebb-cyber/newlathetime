@@ -45,13 +45,13 @@
                 <div class="timer-section">
                     <div class="timer-display">
                         <div class="time">00:00:00</div>
-                        <div class="status">停止中</div>
+                        <div class="status">完了</div>
                         <div class="start-date"></div>
                     </div>
                     <div class="timer-controls">
                         <button class="btn-start"><span class="material-symbols-rounded">play_arrow</span>開始</button>
                         <button class="btn-pause" disabled><span class="material-symbols-rounded">pause</span>一時停止</button>
-                        <button class="btn-stop" disabled><span class="material-symbols-rounded">stop</span>停止</button>
+                        <button class="btn-complete" disabled><span class="material-symbols-rounded">task_alt</span>完了</button>
                     </div>
                 </div>
                 
@@ -394,7 +394,7 @@
                     <ol>
                         <li>図面番号、作業内容、数量を入力します</li>
                         <li>「開始」ボタンを押して作業時間の測定を開始します</li>
-                        <li>作業が終了したら「停止」ボタンを押して記録を保存します</li>
+                        <li>作業が終了したら「完了」ボタンを押して記録を保存します</li>
                         <li>「新規作業」ボタンで次の作業に移ります</li>
                     </ol>
                 </div>
@@ -415,8 +415,8 @@
                             <td>作業時間の測定を一時的に停止します。休憩や他の作業を挟む場合に使用します。一時停止中は時間のカウントが止まりますが、データは保存されません。「再開」ボタンを押すと停止した時点から計測を続けることができます。</td>
                         </tr>
                         <tr>
-                            <td>停止</td>
-                            <td>作業時間の測定を完全に終了し、データを保存します。一度停止すると同じ記録として再開することはできません。</td>
+                            <td>完了</td>
+                            <td>作業時間の測定を完全に終了し、データを保存します。一度完了すると同じ記録として再開することはできません。</td>
                         </tr>
                     </table>
                 </div>

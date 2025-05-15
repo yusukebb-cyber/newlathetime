@@ -4,7 +4,7 @@ const statusDisplay = document.querySelector('.status');
 const startDateDisplay = document.querySelector('.start-date');
 const startBtn = document.querySelector('.btn-start');
 const pauseBtn = document.querySelector('.btn-pause');
-const stopBtn = document.querySelector('.btn-stop');
+const completeBtn = document.querySelector('.btn-complete');
 const newBtn = document.querySelector('.btn-new');
 const exportBtn = document.querySelector('.btn-export');
 const exportAllBtn = document.querySelector('.btn-export-all');
@@ -281,7 +281,7 @@ function startTimer() {
         // ボタン状態更新
         startBtn.disabled = true;
         pauseBtn.disabled = false;
-        stopBtn.disabled = false;
+        completeBtn.disabled = false;
         statusDisplay.textContent = '測定中';
         statusDisplay.style.color = '#2ecc71';
         
@@ -314,8 +314,25 @@ function pauseTimer() {
     }
 }
 
-// タイマーを停止
-function stopTimer() {
+// 作業を完了する前に確認ダイアログを表示
+function confirmCompleteWork() {
+    if (timerRunning || timerPaused) {
+        // 入力チェック
+        const workName = workNameInput.value || '番号なし';
+        const workPart = workPartInput.value || '-';
+        
+        // 確認ダイアログを表示
+        const timeString = formatTimeForSave(elapsedTime);
+        const confirmMessage = `作業を完了して記録しますか？\n\n図面番号: ${workName}\n作業内容: ${workPart}\n作業時間: ${timeString}\n\n※この操作は元に戻せません。`;
+        
+        if (confirm(confirmMessage)) {
+            completeWork();
+        }
+    }
+}
+
+// 作業を完了して記録
+function completeWork() {
     if (timerRunning || timerPaused) {
         clearInterval(timerInterval);
         
@@ -328,8 +345,8 @@ function stopTimer() {
         // ボタン状態更新
         startBtn.disabled = false;
         pauseBtn.disabled = true;
-        stopBtn.disabled = true;
-        statusDisplay.textContent = '停止中';
+        completeBtn.disabled = true;
+        statusDisplay.textContent = '完了';
         statusDisplay.style.color = '#7f8c8d';
         
         // 画面スリープを許可
@@ -645,9 +662,24 @@ function copyWorkData(index) {
 
 // 新規作業開始
 function startNewWork() {
-    // 今の作業を保存
+    // 測定中の作業がある場合は確認
     if (timerRunning || timerPaused) {
-        stopTimer();
+        const workName = workNameInput.value || '番号なし';
+        const timeString = formatTimeForSave(elapsedTime);
+        
+        const confirmMessage = `現在測定中の作業があります。\n\n図面番号: ${workName}\n時間: ${timeString}\n\n作業データを記録して新しい作業を開始しますか？`;
+        
+        if (confirm(confirmMessage)) {
+            completeWork(); // 現在の作業を完了として記録
+        } else {
+            return; // キャンセルされた場合は何もしない
+        }
+    } else {
+        // タイマーリセット（進行中の作業がない場合）
+        resetTimer();
+        
+        // タイマー状態を削除
+        clearTimerState();
     }
     
     // フォームをクリア
@@ -655,12 +687,6 @@ function startNewWork() {
     workPartInput.value = '';
     workQuantityInput.value = '1';
     workNotesInput.value = '';
-    
-    // タイマーリセット
-    resetTimer();
-    
-    // タイマー状態を削除
-    clearTimerState();
     
     // 図面番号入力フィールドにフォーカス
     workNameInput.focus();
@@ -1321,7 +1347,7 @@ function deleteWork(index) {
 // イベントリスナー
 startBtn.addEventListener('click', startTimer);
 pauseBtn.addEventListener('click', pauseTimer);
-stopBtn.addEventListener('click', stopTimer);
+completeBtn.addEventListener('click', confirmCompleteWork);
 newBtn.addEventListener('click', startNewWork);
 exportBtn.addEventListener('click', () => exportData(false));
 exportAllBtn.addEventListener('click', () => exportData(true));
@@ -1407,7 +1433,7 @@ function restoreTimerState() {
         }
         
         if (shouldTimeout) {
-            console.log(`タイマーが長時間(${hoursDiff.toFixed(1)}時間)経過しています。自動的に停止します。`);
+            console.log(`タイマーが長時間(${hoursDiff.toFixed(1)}時間)経過しています。自動的に完了します。`);
             clearTimerState();
             return;
         }
@@ -1442,7 +1468,7 @@ function restoreTimerState() {
             // ボタン状態更新
             startBtn.disabled = true;
             pauseBtn.disabled = false;
-            stopBtn.disabled = false;
+            completeBtn.disabled = false;
         } else if (timerState.timerPaused) {
             // 一時停止中だった場合
             elapsedTime = timerState.elapsedTime;
@@ -1455,7 +1481,7 @@ function restoreTimerState() {
             // ボタン状態更新
             startBtn.disabled = false;
             pauseBtn.disabled = true;
-            stopBtn.disabled = false;
+            completeBtn.disabled = false;
         }
         
         console.log('タイマー状態を復元しました');
