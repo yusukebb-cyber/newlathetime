@@ -175,104 +175,168 @@ async function extractDrawingNumberFromImage(imageFile) {
 
 // テキスト選択用モーダルを表示
 function showTextSelectionModal(textLines) {
-    // iOSのサファリ対策として、少し遅延を入れる
-    setTimeout(() => {
-        // モーダル要素を取得
-        const textModal = document.getElementById('text-selection-modal');
-        const textList = document.getElementById('detected-text-list');
-        const selectedTextPreview = document.getElementById('selected-text-preview');
-        const clearSelectionBtn = document.getElementById('clear-selection');
-        const confirmSelectionBtn = document.getElementById('confirm-selection');
+    // iPhoneのSafari対策として、より長い遅延と複数段階の処理を行う
+    console.log('テキスト選択モーダル表示開始: ' + new Date().toISOString());
+    
+    // モーダル要素を取得して準備する
+    const textModal = document.getElementById('text-selection-modal');
+    const textList = document.getElementById('detected-text-list');
+    const selectedTextPreview = document.getElementById('selected-text-preview');
+    const clearSelectionBtn = document.getElementById('clear-selection');
+    const confirmSelectionBtn = document.getElementById('confirm-selection');
+    
+    // 一旦モーダルのコンテンツをクリアして準備
+    textList.innerHTML = '';
+    selectedTextPreview.textContent = '選択されたテキスト: ';
+    
+    // 選択されたテキストを保存する配列
+    const selectedTexts = [];
+    
+    // 選択されたテキストのプレビューを更新
+    const updatePreview = () => {
+        if (selectedTexts.length === 0) {
+            selectedTextPreview.textContent = '選択されたテキスト: ';
+        } else {
+            selectedTextPreview.textContent = '選択されたテキスト: ' + selectedTexts.join(' ');
+        }
+    };
+    
+    // 検出されたテキスト行をリストに追加
+    textLines.forEach((line, index) => {
+        if (line.trim() === '') return;
         
-        // 選択されたテキストを保存する配列
-        const selectedTexts = [];
-        
-        // 選択されたテキストのプレビューを更新
-        const updatePreview = () => {
-            if (selectedTexts.length === 0) {
-                selectedTextPreview.textContent = '選択されたテキスト: ';
-            } else {
-                selectedTextPreview.textContent = '選択されたテキスト: ' + selectedTexts.join(' ');
-            }
-        };
-        
-        // リストをクリア
-        textList.innerHTML = '';
-        
-        // 検出されたテキスト行をリストに追加
-        textLines.forEach((line, index) => {
-            if (line.trim() === '') return;
-            
-            const listItem = document.createElement('li');
-            listItem.textContent = line;
-            listItem.addEventListener('click', () => {
-                // すでに選択済みの場合、選択解除
-                if (listItem.classList.contains('selected')) {
-                    listItem.classList.remove('selected');
-                    const index = selectedTexts.indexOf(line);
-                    if (index > -1) {
-                        selectedTexts.splice(index, 1);
-                    }
-                } 
-                // 選択されていない場合、選択（最大2つまで）
-                else if (selectedTexts.length < 2) {
-                    listItem.classList.add('selected');
-                    selectedTexts.push(line);
+        const listItem = document.createElement('li');
+        listItem.textContent = line;
+        listItem.addEventListener('click', () => {
+            // すでに選択済みの場合、選択解除
+            if (listItem.classList.contains('selected')) {
+                listItem.classList.remove('selected');
+                const index = selectedTexts.indexOf(line);
+                if (index > -1) {
+                    selectedTexts.splice(index, 1);
                 }
-                
-                // プレビューを更新
-                updatePreview();
-            });
+            } 
+            // 選択されていない場合、選択（最大2つまで）
+            else if (selectedTexts.length < 2) {
+                listItem.classList.add('selected');
+                selectedTexts.push(line);
+            }
             
-            textList.appendChild(listItem);
+            // プレビューを更新
+            updatePreview();
         });
         
-        // イベントリスナーを追加する前に一度削除（重複防止）
-        if (clearSelectionBtn._hasClickListener) {
-            clearSelectionBtn.removeEventListener('click', clearSelectionBtn._clickHandler);
-        }
-        if (confirmSelectionBtn._hasClickListener) {
-            confirmSelectionBtn.removeEventListener('click', confirmSelectionBtn._clickHandler);
-        }
-        
-        // 選択クリアボタンのイベント
-        clearSelectionBtn._clickHandler = () => {
-            selectedTexts.length = 0;
-            updatePreview();
-            
-            // 選択状態をクリア
-            document.querySelectorAll('.text-selection-list li.selected').forEach(item => {
-                item.classList.remove('selected');
-            });
-        };
-        clearSelectionBtn._hasClickListener = true;
-        clearSelectionBtn.addEventListener('click', clearSelectionBtn._clickHandler);
-        
-        // 確定ボタンのイベント
-        confirmSelectionBtn._clickHandler = () => {
-            // 選択されたテキストを半角スペースで結合
-            const combinedText = selectedTexts.join(' ');
-            
-            // コールバック関数を呼び出し
-            if (window.resolveDrawingNumber) {
-                window.resolveDrawingNumber(combinedText || null);
-            }
-            
-            // モーダルを閉じる
-            textModal.style.display = 'none';
-        };
-        confirmSelectionBtn._hasClickListener = true;
-        confirmSelectionBtn.addEventListener('click', confirmSelectionBtn._clickHandler);
-        
-        // モーダルを表示
-        textModal.style.display = 'flex';
-        
-        // 初期表示
+        textList.appendChild(listItem);
+    });
+    
+    // iOSのSafariでイベントリスナーが重複登録される問題を防ぐ
+    // イベントリスナーを追加する前に一度削除
+    if (clearSelectionBtn._hasClickListener) {
+        clearSelectionBtn.removeEventListener('click', clearSelectionBtn._clickHandler);
+    }
+    if (confirmSelectionBtn._hasClickListener) {
+        confirmSelectionBtn.removeEventListener('click', confirmSelectionBtn._clickHandler);
+    }
+    
+    // 選択クリアボタンのイベント
+    clearSelectionBtn._clickHandler = () => {
+        selectedTexts.length = 0;
         updatePreview();
         
-        // iOS Safariでモーダルを見えやすくするために、bodyのスクロールを無効化
-        document.body.style.overflow = 'hidden';
-    }, 300); // 300msの遅延
+        // 選択状態をクリア
+        document.querySelectorAll('.text-selection-list li.selected').forEach(item => {
+            item.classList.remove('selected');
+        });
+    };
+    clearSelectionBtn._hasClickListener = true;
+    clearSelectionBtn.addEventListener('click', clearSelectionBtn._clickHandler);
+    
+    // 確定ボタンのイベント
+    confirmSelectionBtn._clickHandler = () => {
+        // 選択されたテキストを半角スペースで結合
+        const combinedText = selectedTexts.join(' ');
+        
+        // コールバック関数を呼び出し
+        if (window.resolveDrawingNumber) {
+            window.resolveDrawingNumber(combinedText || null);
+        }
+        
+        // モーダルを閉じる
+        textModal.style.display = 'none';
+        // bodyのスクロールを再度有効化
+        document.body.style.overflow = '';
+    };
+    confirmSelectionBtn._hasClickListener = true;
+    confirmSelectionBtn.addEventListener('click', confirmSelectionBtn._clickHandler);
+    
+    // iOS Safariのためのモーダル表示手順
+    // 1. まず準備完了のフラグを設定
+    window._modalReadyToShow = true;
+    
+    // 2. 段階的に処理を行う - まず即座にスタイル設定
+    textModal.style.opacity = '0';
+    textModal.style.display = 'flex';
+    
+    // 3. 短い遅延後にトランジションを開始
+    setTimeout(() => {
+        document.body.style.overflow = 'hidden'; // スクロール禁止
+        textModal.style.opacity = '1';
+        textModal.style.transition = 'opacity 0.3s ease-in-out';
+        
+        console.log('モーダル表示トランジション開始: ' + new Date().toISOString());
+        
+        // 4. さらに遅延を入れてモーダルが確実に表示されるようにする
+        setTimeout(() => {
+            // 最終チェック - モーダルが表示されていなければ強制的に表示
+            if (textModal.style.display !== 'flex') {
+                textModal.style.display = 'flex';
+                textModal.style.opacity = '1';
+            }
+            
+            // フォーカスを設定してユーザーの注意を引く
+            if (confirmSelectionBtn) {
+                confirmSelectionBtn.focus();
+            }
+            
+            console.log('モーダル表示完了: ' + new Date().toISOString());
+            
+            // iOS Safariで注目を集めるため、わずかなアニメーションを加える
+            textModal.classList.add('modal-attention');
+            setTimeout(() => {
+                textModal.classList.remove('modal-attention');
+            }, 300);
+            
+        }, 300);
+    }, 50);
+    
+    // ユーザーがページに触れた時のバックアッププラン
+    function ensureModalVisible() {
+        // 準備完了フラグがあり、まだモーダルが表示されていない場合
+        if (window._modalReadyToShow && textModal.style.display !== 'flex') {
+            console.log('ユーザーアクションによるモーダル表示: ' + new Date().toISOString());
+            textModal.style.display = 'flex';
+            textModal.style.opacity = '1';
+            document.body.style.overflow = 'hidden';
+            
+            // フォーカスを設定
+            if (confirmSelectionBtn) {
+                confirmSelectionBtn.focus();
+            }
+        }
+    }
+    
+    // タッチイベントでモーダル表示を確実にする（iOS Safari向け）
+    if (!window._touchListenerAdded) {
+        document.addEventListener('touchstart', ensureModalVisible, { once: true });
+        window._touchListenerAdded = true;
+        
+        // 5秒後にリスナーを削除（不要になったため）
+        setTimeout(() => {
+            document.removeEventListener('touchstart', ensureModalVisible);
+            window._touchListenerAdded = false;
+            window._modalReadyToShow = false;
+        }, 5000);
+    }
 }
 
 // テキスト選択モーダルを閉じる
